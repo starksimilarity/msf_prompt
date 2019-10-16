@@ -80,17 +80,19 @@ class OffPromptSession(PromptSession):
             lower_text = (
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
-            
+
             if lower_text.startswith("exploit"):
                 """getting the attributes of the module is going to be difficult;
                 instead the program will check against valid list when user enters; investigate more"""
                 # validate targets
                 # validate user permissions
-                
+
                 # prompt for confirm if 'exploit'
-                confirm = yes_no_dialog(title="Confirm Exploit", text = "Confirm Submission")
+                confirm = yes_no_dialog(
+                    title="Confirm Exploit", text="Confirm Submission"
+                )
                 if confirm:
-                    pass 
+                    pass
                 else:
                     raise Exception("User aborted exploitation")
 
