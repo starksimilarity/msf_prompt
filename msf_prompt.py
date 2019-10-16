@@ -76,6 +76,28 @@ class OffPromptSession(PromptSession):
         # self.validator = msfValidator()
 
     def handle_input(self, text):
+        """
+        Main callback for when the user submits input.
+    
+        Parameters
+        ----------
+        text : str
+            The user-submitted command
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        Exception
+            General Error
+        UserOverride
+            If user elects to override warning
+        UserOverrideDenied
+            If user declines to override warning
+        """
+        
         try:
             lower_text = (
                 text.lower().strip()
@@ -98,6 +120,7 @@ class OffPromptSession(PromptSession):
 
             ############################################
             # Validate rhost against allowed target file
+            ############################################
             elif lower_text.startswith("set") and "rhost" in lower_text:
 
                 # find all IPs in 'set' command
@@ -112,7 +135,6 @@ class OffPromptSession(PromptSession):
 
                     # ask user if they want to override the warning
                     # future: allow configuration to turn off overrides
-                    # override = self.prompt("Would you like to override warning? [Y/N] ")
                     override = yes_no_dialog(
                         title="Target Override",
                         text="An invalid target was added; do you want to continue anyway?",
@@ -126,6 +148,7 @@ class OffPromptSession(PromptSession):
 
             #######################################################################
             # Validate selected module against list of allowed modules for the user
+            #######################################################################
             elif lower_text.startswith("use"):
                 try:
                     module = re.findall("use (.*)", lower_text)[0]
@@ -133,7 +156,9 @@ class OffPromptSession(PromptSession):
                 except InvalidPermissionError as e:
                     print(e)
                     logging.warning(f"<<< {str(e)}")
-                    # override = self.prompt("Would you like to override warning? [Y/N] ")
+                    
+                    # ask user if they want to override the warning
+                    # future: allow configuration to turn off overrides
                     override = yes_no_dialog(
                         title="User Module Permission Override",
                         text="The current user does not have permission to run the selected module. \
@@ -150,7 +175,9 @@ class OffPromptSession(PromptSession):
                     print(e)
                     logging.warning(f"<<< {str(e)}")
 
+            ######################
             # finally do something
+            ######################
             self.msf_console.execute(text)
 
         except UserOverride as e:
@@ -170,12 +197,48 @@ class OffPromptSession(PromptSession):
             logging.warning(f"<<< {str(e)}")
 
     def validate_targets(self, targets):
+        """
+        Ensure targets are on approved white list
+
+        Parameters
+        ----------
+            targets : list of str
+                List of strings representing string of RHOST IPs
+
+        Returns
+        -------
+            Exception or True
+
+        Raises
+        ------
+            InvalidTargetError
+                Raised on first occurnace of invalid target within list of targets
+        """
+        
         for target in targets:
             if target not in self.allowed_targets:
                 raise InvalidTargetError(f"Warning {target} is not on allowed list")
         return True
 
     def validate_user_perms(self, module):
+        """
+        Ensure user has permission to run module.
+
+        Parameters
+        ----------
+            module : str
+                String name of the requested module; does not include prefix (e.g. "exploit")
+
+        Returns
+        -------
+            True if user has permission otherwise raises exception
+
+        Raises
+        ------
+            InvalidPermissionError
+                If user does not have permission to run selected module
+        """
+
         # future: get user allowed modules from db
         # future: allow wildcards in allowed list
         user_allowed_modules = self.allowed_modules(self.current_user)
@@ -191,6 +254,20 @@ class OffPromptSession(PromptSession):
         return os.getlogin()
 
     def allowed_modules(self, user):
+        """
+        Returns list of allowed modules for a given user.
+        
+        Parameters
+        ----------
+            user : str
+                String name of the user.
+
+        Returns
+        -------
+            module_list.get(user, [])
+                List of approved modules for a given user, otherwise empty list for unknown user
+        """
+
         # future: make this a DB not a pickle
         module_list = []
         with open(USER_MODULE_FILE, "rb") as infi:
@@ -211,6 +288,7 @@ class OffPromptSession(PromptSession):
 
 
 def main():
+
     hist = FileHistory(".off_prompt_hist")
     logging.basicConfig(
         filename=".off_prompt.log",
