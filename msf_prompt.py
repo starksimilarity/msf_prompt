@@ -97,7 +97,7 @@ class OffPromptSession(PromptSession):
         UserOverrideDenied
             If user declines to override warning
         """
-        
+
         try:
             lower_text = (
                 text.lower().strip()
@@ -156,7 +156,7 @@ class OffPromptSession(PromptSession):
                 except InvalidPermissionError as e:
                     print(e)
                     logging.warning(f"<<< {str(e)}")
-                    
+
                     # ask user if they want to override the warning
                     # future: allow configuration to turn off overrides
                     override = yes_no_dialog(
@@ -214,7 +214,7 @@ class OffPromptSession(PromptSession):
             InvalidTargetError
                 Raised on first occurnace of invalid target within list of targets
         """
-        
+
         for target in targets:
             if target not in self.allowed_targets:
                 raise InvalidTargetError(f"Warning {target} is not on allowed list")
@@ -304,6 +304,8 @@ def main():
         print(f"something when very wrong, {e}")
         logging.warning(e)
 
+
+    #main user input loop
     while True:
         try:
             # get_prompt_text and msf_style are imported

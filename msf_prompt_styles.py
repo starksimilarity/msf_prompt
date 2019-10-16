@@ -15,6 +15,21 @@ msf_style = Style.from_dict(
 
 
 def get_prompt_text(raw_text):
+    """
+    Get formatted prompt from msfrpc prompt
+
+    Parameters
+    ----------
+        raw_text : str
+            Raw prompt returned from pymetasploit3 msfclient rpc prompt
+
+    Returns
+    -------
+        prompt_text : list
+            List of tuples descibing prompt formatting
+
+    """
+
     try:
         msf = re.findall("msf[0-9]?", raw_text)[0]
     except:
