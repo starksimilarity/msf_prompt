@@ -1,0 +1,13 @@
+README.md
+setup.py
+pymetasploit3/__init__.py
+pymetasploit3/msfconsole.py
+pymetasploit3/msfrpc.py
+pymetasploit3/utils.py
+pymetasploit3.egg-info/PKG-INFO
+pymetasploit3.egg-info/SOURCES.txt
+pymetasploit3.egg-info/dependency_links.txt
+pymetasploit3.egg-info/requires.txt
+pymetasploit3.egg-info/top_level.txt
+pymetasploit3/scripts/pymsfconsole.py
+pymetasploit3/scripts/pymsfrpc.py
