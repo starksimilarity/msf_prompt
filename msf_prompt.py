@@ -88,7 +88,7 @@ class OffPromptSession(PromptSession):
         wordlist = infi.read().strip().split(",")
         print(wordlist)
 
-    def __init__(self, console, *args, **kwargs):
+    def __init__(self, console, allow_overrides=False, *args, **kwargs):
         """
         Parameters
         ----------
@@ -103,6 +103,7 @@ class OffPromptSession(PromptSession):
         self.completer = WordCompleter(self.wordlist, ignore_case=True)
         self.auto_suggest = AutoSuggestFromHistory()
         self.enable_history_search = True
+        self._allow_overrides = allow_overrides
         # self.allowed_targets = ["10.10.10.10", "20.20.20.20"]
         # self.validator = msfValidator()
 
@@ -169,17 +170,23 @@ class OffPromptSession(PromptSession):
                     print(e)
                     logging.warning(f"<<< {str(e)}")
 
-                    # ask user if they want to override the warning
-                    # future: allow configuration to turn off overrides
-                    override = yes_no_dialog(
-                        title="Target Override",
-                        text="An invalid target was added; do you want to continue anyway?",
-                    )
-                    if override:
-                        raise UserOverride("{self.current_user} overrode warning {e}")
+                    if self.allow_overrides:
+                        # ask user if they want to override the warning
+                        override = yes_no_dialog(
+                            title="Target Override",
+                            text="An invalid target was added; do you want to continue anyway?",
+                        )
+                        if override:
+                            raise UserOverride(
+                                "{self.current_user} overrode warning {e}"
+                            )
+                        else:
+                            raise UserOverrideDenied(
+                                "{self.current_user} chose not to overide warning {e}"
+                            )
                     else:
                         raise UserOverrideDenied(
-                            "{self.current_user} chose not to overide warning {e}"
+                            "{self.current_user} attempted disallowed action: {e}"
                         )
 
             #######################################################################
@@ -193,18 +200,24 @@ class OffPromptSession(PromptSession):
                     print(e)
                     logging.warning(f"<<< {str(e)}")
 
-                    # ask user if they want to override the warning
-                    # future: allow configuration to turn off overrides
-                    override = yes_no_dialog(
-                        title="User Module Permission Override",
-                        text="The current user does not have permission to run the selected module. \
-                                Would you like to continue anyway?",
-                    )
-                    if override:
-                        raise UserOverride("{self.current_user} overrode warning {e}")
+                    if self.allow_overrides:
+                        # ask user if they want to override the warning
+                        override = yes_no_dialog(
+                            title="User Module Permission Override",
+                            text="The current user does not have permission to run the selected module. \
+                                    Would you like to continue anyway?",
+                        )
+                        if override:
+                            raise UserOverride(
+                                "{self.current_user} overrode warning {e}"
+                            )
+                        else:
+                            raise UserOverrideDenied(
+                                "{self.current_user} chose not to overide warning {e}"
+                            )
                     else:
                         raise UserOverrideDenied(
-                            "{self.current_user} chose not to overide warning {e}"
+                            "{self.current_user} attempted disallowed action: {e}"
                         )
 
                 except Exception as e:
@@ -289,6 +302,10 @@ class OffPromptSession(PromptSession):
     def current_user(self):
         return os.getlogin()
 
+    @property
+    def allow_overrides(self):
+        return self._allow_overrides
+
     def allowed_modules(self, user):
         """
         Returns list of allowed modules for a given user.
@@ -332,7 +349,7 @@ def main():
         level=logging.DEBUG,
     )
     try:
-        o = parseargs()
+        o = parseargs()  # future: replace with config file
         logging.info("Starting MsfRpcClient, MsfRpcConsole, OffPromptSession")
         client = msfrpc.MsfRpcClient(**o.__dict__)
         console = msfconsole.MsfRpcConsole(client)
