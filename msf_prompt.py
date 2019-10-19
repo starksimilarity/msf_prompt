@@ -11,9 +11,10 @@ from offpromptsession import OffPromptSession
 from msf_prompt_styles import msf_style, get_prompt_text
 from utils import parseargs
 
-#future: add setuptools
+# future: add setuptools
 
 HISTORY_FILENAME = ".off_prompt_hist"
+
 
 def main():
     logging.basicConfig(
@@ -27,7 +28,9 @@ def main():
         logging.info("Starting MsfRpcClient, MsfRpcConsole, OffPromptSession")
         client = msfrpc.MsfRpcClient(**o.__dict__)
         console = msfconsole.MsfRpcConsole(client)
-        sess = OffPromptSession(console, hist_name=HISTORY_FILENAME, allow_overrides=True)
+        sess = OffPromptSession(
+            console, hist_name=HISTORY_FILENAME, allow_overrides=True
+        )
     except Exception as e:
         print(f"something when very wrong, {e}")
         logging.warning(e)

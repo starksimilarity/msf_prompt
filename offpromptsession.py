@@ -18,7 +18,7 @@ import pymetasploit3.msfconsole as msfconsole
 
 from msf_prompt_styles import msf_style, get_prompt_text
 
-#future: add setuptools
+# future: add setuptools
 
 # The file that stores user permissions for modules
 USER_MODULE_FILE = "user_module_list.pickle"
@@ -105,10 +105,10 @@ class OffPromptSession(PromptSession):
 
         self.msf_console = console
         self._allow_overrides = allow_overrides
-        #self.history=None
-        #try:
+        # self.history=None
+        # try:
         #    self.history = FileHistory(hist_name)
-        #except Exception as e:
+        # except Exception as e:
         #    logging.info('probably no hist_name passed; in-memory history only')
         _history = FileHistory(hist_name)
         super().__init__(history=_history, *args, **kwargs)
@@ -348,4 +348,3 @@ class OffPromptSession(PromptSession):
             logging.warning(f"<<< {str(e)}")
 
         return tgts
-
