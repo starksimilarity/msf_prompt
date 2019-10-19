@@ -17,6 +17,7 @@ import pymetasploit3.msfrpc as msfrpc
 import pymetasploit3.msfconsole as msfconsole
 
 from msf_prompt_styles import msf_style, get_prompt_text
+from utils import parseargs
 
 # The file that stores user permissions for modules
 USER_MODULE_FILE = "user_module_list.pickle"
@@ -326,8 +327,9 @@ def main():
         level=logging.DEBUG,
     )
     try:
+        o = parseargs()
         logging.info("Starting MsfRpcClient, MsfRpcConsole, OffPromptSession")
-        client = msfrpc.MsfRpcClient("password", ssl=True)
+        client = msfrpc.MsfRpcClient(**o.__dict__)
         console = msfconsole.MsfRpcConsole(client)
         sess = OffPromptSession(console, history=hist)
     except Exception as e:
