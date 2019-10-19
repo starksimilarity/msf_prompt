@@ -6,11 +6,15 @@ msf_prompt is a Python library that emulates the msfconsole by wrapping a pymeta
 
 ## Usage
 
+Stand-alone
 ```bash
-python msf_prompt.py
+> python msf_prompt.py
 ```
 
+As a module
 ```python
 import msf_prompt
+import pymetasploit3
+
 sess = msf_prompt.OffPromptSession(pymetasploit3.msfrpc.MsfRpcClient())
 ```
