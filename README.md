@@ -13,10 +13,10 @@ Stand-alone
 
 As a module
 ```python
-import msf_prompt
+import offpromptsession 
 import pymetasploit3
 
-sess = msf_prompt.OffPromptSession(pymetasploit3.msfrpc.MsfRpcClient())
+sess = offpromptsession.OffPromptSession(pymetasploit3.msfrpc.MsfRpcClient())
 ```
 
 ## License
