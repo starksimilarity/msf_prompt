@@ -1,5 +1,6 @@
 from optparse import OptionParser
 
+
 def parseargs():
     p = OptionParser()
     p.add_option("-P", dest="password", help="Password for msfrpcd", default="password")

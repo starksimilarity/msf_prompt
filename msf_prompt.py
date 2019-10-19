@@ -58,7 +58,7 @@ class msfValidator(Validator):
 
 
 class OffPromptSession(PromptSession):
-    """Main class that wraps pymetasploit3 console in prompt_toolkit.PromptSession
+    """Main class that wraps pymetasploit3 console with prompt_toolkit.PromptSession
 
     Attributes
     ----------
@@ -84,7 +84,7 @@ class OffPromptSession(PromptSession):
     """
 
     wordlist = []
-    with open("msf_completer.txt", "r+") as infi:
+    with open("word_suggestions.txt", "r+") as infi:
         wordlist = infi.read().strip().split(",")
         print(wordlist)
 
@@ -133,6 +133,11 @@ class OffPromptSession(PromptSession):
             lower_text = (
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
+
+            if (
+                lower_text == "exit"
+            ):  # BUG: probably some bad side effects here (i.e. exitting session instead of shell)
+                exit(0)
 
             if lower_text.startswith("exploit"):
                 """getting the attributes of the module is going to be difficult;
