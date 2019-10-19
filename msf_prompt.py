@@ -57,8 +57,29 @@ class msfValidator(Validator):
 
 
 class OffPromptSession(PromptSession):
-    """
-    Main class that wraps pymetasploit3 console in prompt_toolkit.PromptSession
+    """Main class that wraps pymetasploit3 console in prompt_toolkit.PromptSession
+
+    Attributes
+    ----------
+    auto_suggest : prompt_toolkit.auto_suggest.AutoSuggestFromHistory
+        auto populate line based on user's history
+    completer : prompt_toolkit.completion.WordCompleter
+        suggests completion to user based on string currently typed
+    msf_console : pymetasploit3.msfconsole.MsfRpcConsole
+        console session for MetasploitFramework
+    wordlist : list
+        list of words to populate the completer
+
+    Methods
+    -------
+    handle_input(self, text)
+        Main callback for when the user submits input
+    validate_targets(self, targets)
+        Ensure targets are on approved white list
+    validate_user_perms(self, module)
+        Ensure user has permission to run module.
+    allowed_modules(self, user)
+        Returns list of allowed modules for a given user.
     """
 
     wordlist = []
@@ -67,6 +88,15 @@ class OffPromptSession(PromptSession):
         print(wordlist)
 
     def __init__(self, console, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        console : pymetasploit3.msfconsole.MsfRpcConsole
+            console session for MetasploitFramework
+        *args, **kwargs:
+            args to override default PromptSession behavoir
+        """
+
         super().__init__(*args, **kwargs)
         self.msf_console = console
         self.completer = WordCompleter(self.wordlist, ignore_case=True)
@@ -77,7 +107,7 @@ class OffPromptSession(PromptSession):
 
     def handle_input(self, text):
         """
-        Main callback for when the user submits input.
+        Main callback for when the user submits input
     
         Parameters
         ----------
@@ -202,7 +232,7 @@ class OffPromptSession(PromptSession):
 
         Parameters
         ----------
-            targets : list of str
+            targets : list[str]
                 List of strings representing string of RHOST IPs
 
         Returns
@@ -304,8 +334,7 @@ def main():
         print(f"something when very wrong, {e}")
         logging.warning(e)
 
-
-    #main user input loop
+    # main user input loop
     while True:
         try:
             # get_prompt_text and msf_style are imported
