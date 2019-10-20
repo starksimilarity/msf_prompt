@@ -20,7 +20,7 @@ def main():
     logging.basicConfig(
         filename=".off_prompt.log",
         format="===================\n%(asctime)s\n%(message)s",
-        level=logging.DEBUG,
+        level=logging.INFO,
     )
 
     try:
@@ -33,7 +33,7 @@ def main():
         )
     except Exception as e:
         print(f"something when very wrong, {e}")
-        logging.warning(e)
+        logging.warning(f"something went very wrong {e}")
 
     # main user input loop
     while True:
