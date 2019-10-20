@@ -1,3 +1,4 @@
 .off_prompt_hist
 .off_prompt.log
 __pycache__/*
+*.swp
