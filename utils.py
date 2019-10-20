@@ -21,7 +21,7 @@ def parseargs():
 
 
 def parseconfig(filename):
-    """Opens a configuration file as returns a dictionary of parameters
+    """Opens a configuration file and returns a dictionary of parameters
 
     Format of the config file is "parameter:value #comment"
     Lines that begin with # are ignored

@@ -13,3 +13,9 @@ USER WARNING OVERRIDE: stark overrode warning: Warning user does not have permis
 ===================
 2019-10-20 14:14:18,136
 USER WARNING OVERRIDE: stark overrode warning: Warning 10.10.10.101 is not on allowed list
+===================
+2019-10-20 14:20:38,138
+Starting MsfRpcClient, MsfRpcConsole, OffPromptSession
+===================
+2019-10-20 14:20:40,292
+something went very wrong 'MsfRPC: Authentication failed'
