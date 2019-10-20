@@ -18,10 +18,10 @@ from msf_prompt_styles import msf_style, get_prompt_text
 # future: add setuptools
 
 # The file that stores user permissions for modules
-DEFAULT_USER_MODULE_FILE = "user_module_list.pickle"
+DEFAULT_USER_MODULE_FILE = "configs/user_module_list.pickle"
 # The file that stores list of valid targets
-DEFAULT_ALLOWED_TARGETS_FILE = "allowed_targets.pickle"
-
+DEFAULT_ALLOWED_TARGETS_FILE = "configs/allowed_targets.pickle"
+DEFAULT_COMPLETER_WORDLIST = "configs/word_suggestions.txt"
 
 class InvalidTargetError(Exception):
     pass
@@ -88,7 +88,7 @@ class OffPromptSession(PromptSession):
 
     # future: make this an instance variable?
     wordlist = []
-    with open("word_suggestions.txt", "r+") as infi:
+    with open(DEFAULT_COMPLETER_WORDLIST, "r+") as infi:
         wordlist = infi.read().strip().split(",")
 
     def __init__(

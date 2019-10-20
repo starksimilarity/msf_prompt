@@ -13,8 +13,8 @@ from utils import parseargs, parseconfig
 
 # future: add setuptools
 
+CONFIG_FILENAME = "configs/prompt_config"
 HISTORY_FILENAME = ".off_prompt_hist"
-CONFIG_FILENAME = "prompt_config"
 LOGGING_FILENAME = ".off_prompt_log"
 
 

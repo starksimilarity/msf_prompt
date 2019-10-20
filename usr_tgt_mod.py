@@ -5,8 +5,8 @@ from collections import namedtuple
 
 from prompt_toolkit import PromptSession
 
-DEFAULT_USER_MODULE_FILE = "user_module_list.pickle"
-DEFAULT_ALLOWED_TARGETS_FILE = "allowed_targets.pickle"
+DEFAULT_USER_MODULE_FILE = "configs/user_module_list.pickle"
+DEFAULT_ALLOWED_TARGETS_FILE = "configs/allowed_targets.pickle"
 
 #future: add a bunch of comments
 
