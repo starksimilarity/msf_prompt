@@ -2,6 +2,9 @@
 
 msf_prompt is a Python library that emulates the msfconsole by wrapping a pymetasploit3 MsfRpcConsole in a prompt_toolkit PromptSession
 
+pymetasploit3: (https://github.com/DanMcInerney/pymetasploit3)
+prompt_toolkit: (https://github.com/prompt-toolkit/python-prompt-toolkit)
+
 ## Installation
 
 ## Usage
