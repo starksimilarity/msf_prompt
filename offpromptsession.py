@@ -185,11 +185,11 @@ class OffPromptSession(PromptSession):
                         )
                         if override:
                             raise UserOverride(
-                                f"{self.current_user} overrode warning {e}"
+                                f"{self.current_user} overrode warning: {e}"
                             )
                         else:
                             raise UserOverrideDenied(
-                                f"{self.current_user} chose not to overide warning {e}"
+                                f"{self.current_user} chose not to overide warning: {e}"
                             )
                     else:
                         raise UserOverrideDenied(
@@ -216,11 +216,11 @@ class OffPromptSession(PromptSession):
                         )
                         if override:
                             raise UserOverride(
-                                f"{self.current_user} overrode warning {e}"
+                                f"{self.current_user} overrode warning: {e}"
                             )
                         else:
                             raise UserOverrideDenied(
-                                f"{self.current_user} chose not to overide warning {e}"
+                                f"{self.current_user} chose not to overide warning: {e}"
                             )
                     else:
                         raise UserOverrideDenied(
