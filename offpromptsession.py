@@ -327,18 +327,21 @@ class OffPromptSession(PromptSession):
 
         Returns
         -------
-            module_list.get(user, [])
-                List of approved modules for a given user, otherwise empty list for unknown user
+            module_list.get(user, []) + module_list.get('ALL', [])
+                List of approved modules for a given user and all users, otherwise empty list
         """
-
+        
         # future: make this a DB not a pickle
         module_list = []
         with open(USER_MODULE_FILE, "rb") as infi:
             module_list = pickle.load(infi)
-        return module_list.get(user, [])
+
+        return module_list.get(user, []) + module_list.get('ALL', [])
 
     @property
     def allowed_targets(self):
+        """Loads and returns list of approved targets from ALLOWED_TARGET_FILE
+        """
         tgts = []
         try:
             with open(ALLOWED_TARGETS_FILE, "rb") as infi:
@@ -346,5 +349,4 @@ class OffPromptSession(PromptSession):
         except Exception as e:
             print(e)
             logging.warning(f"<<< {str(e)}")
-
         return tgts
