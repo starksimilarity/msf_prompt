@@ -21,7 +21,9 @@ from msf_prompt_styles import msf_style, get_prompt_text
 DEFAULT_USER_MODULE_FILE = "configs/user_module_list.pickle"
 # The file that stores list of valid targets
 DEFAULT_ALLOWED_TARGETS_FILE = "configs/allowed_targets.pickle"
+# The file that contains a list of standard msfconsole commands
 DEFAULT_COMPLETER_WORDLIST = "configs/word_suggestions.txt"
+
 
 class InvalidTargetError(Exception):
     pass
@@ -40,7 +42,35 @@ class UserOverrideDenied(Exception):
 
 
 class MsfAutoSuggest(AutoSuggestFromHistory):
+    """Class used for suggesting auto_complete strings to the user
+
+    MsfAutoSuggest extends AutoSuggestFromHistory by adding a search through a static
+    wordlist and then from the MsfRpcConsole's tab-complete functionality (console.console.tabs(str)). 
+    The search order is: History, Static Wordlist, Console Tab-complete.
+
+    Attributes
+    ----------
+    console : pymetasploit3.MsfRpcConsole
+        current console that can be used to search through tab-complete
+    wordlist : list[str]
+        static list of words that are common for msfconsole
+
+    Methods
+    -------
+    get_suggestion(self, buffer, document)
+        Main callback for when an auto_suggest is called; usually when the buffer updates
+    """
+
     def __init__(self, console, wordlist=None, **kwargs):
+        """
+        Parameters
+        ----------
+        console : pymetasploit3.MsfRpcConsole
+            current console that can be used to search through tab-complete
+        wordlist : list[str], optional
+            static list of words that are common for msfconsole
+        """
+
         self.console = console
         if wordlist:
             self.wordlist = wordlist
@@ -48,25 +78,43 @@ class MsfAutoSuggest(AutoSuggestFromHistory):
             self.wordlist = []
 
     def get_suggestion(self, buffer, document):
+        """main callback when a suggestion is needed from auto_suggest
+
+        The search order is : History, Static Wordlist, Console Tab-complete 
+        
+        Parameters
+        ----------
+        buffer : prompt_toolkit.buffer.Buffer
+        document : prompt_toolkit.document.Document
+
+        """
+
         # check user history first
-        suggestion = super().get_suggestion(buffer, document) 
-        if suggestion is None: #nothing in our history
-            # check the wordlist
-            text = document.text.rsplit('\n', 1)[-1] #not totally sure what this does; stealing from AutoSuggestFromHistory
-            if text.strip():
+        suggestion = super().get_suggestion(buffer, document)
+        if suggestion is None:  # nothing in our history
+            text = document.text.rsplit("\n", 1)[
+                -1
+            ]  # not totally sure what this does; stealing from AutoSuggestFromHistory
+            if text.strip():  # don't suggest on a blank line
+                # check the wordlist
                 for word in self.wordlist:
                     if word.startswith(text):
-                        suggestion = Suggestion(word[len(text):])
+                        suggestion = Suggestion(word[len(text) :])
                         break
-            if suggestion is None: #nothing from wordlist
-                tabs = self.console.console.tabs(text)
-                if tabs:
-                    suggestion = Suggestion(tabs[0][len(text):])
-                # check tab complete suggestions from rpc
+                if suggestion is None:  # nothing from wordlist
+                    # check tab complete suggestions from rpc
+                    tabs = self.console.console.tabs(
+                        text
+                    )  # should return a list of strings that match tab-complete for the console
+                    if tabs:
+                        suggestion = Suggestion(
+                            tabs[0][len(text) :]
+                        )  # take the first one and suggest the rest of the word
         return suggestion
 
     # future
-    #def get_suggestion_async
+    # def get_suggestion_async
+
 
 class msfValidator(Validator):
     """
@@ -163,7 +211,7 @@ class OffPromptSession(PromptSession):
         super().__init__(history=_history, *args, **kwargs)
         self.completer = WordCompleter(self.wordlist, ignore_case=True)
         self.enable_history_search = True
-        #self.auto_suggest = AutoSuggestFromHistory()
+        # self.auto_suggest = AutoSuggestFromHistory()
         self.auto_suggest = MsfAutoSuggest(self.msf_console, self.wordlist)
         # self.validator = msfValidator()
 
