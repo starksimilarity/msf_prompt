@@ -9,7 +9,7 @@ from prompt_toolkit import PromptSession, HTML
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.auto_suggest import *
 from prompt_toolkit.validation import Validator, ValidationError
 from prompt_toolkit.shortcuts import yes_no_dialog
 
@@ -38,6 +38,35 @@ class UserOverride(Exception):
 class UserOverrideDenied(Exception):
     pass
 
+
+class MsfAutoSuggest(AutoSuggestFromHistory):
+    def __init__(self, console, wordlist=None, **kwargs):
+        self.console = console
+        if wordlist:
+            self.wordlist = wordlist
+        else:
+            self.wordlist = []
+
+    def get_suggestion(self, buffer, document):
+        # check user history first
+        suggestion = super().get_suggestion(buffer, document) 
+        if suggestion is None: #nothing in our history
+            # check the wordlist
+            text = document.text.rsplit('\n', 1)[-1] #not totally sure what this does; stealing from AutoSuggestFromHistory
+            if text.strip():
+                for word in self.wordlist:
+                    if word.startswith(text):
+                        suggestion = Suggestion(word[len(text):])
+                        break
+            if suggestion is None: #nothing from wordlist
+                tabs = self.console.console.tabs(text)
+                if tabs:
+                    suggestion = Suggestion(tabs[0][len(text):])
+                # check tab complete suggestions from rpc
+        return suggestion
+
+    # future
+    #def get_suggestion_async
 
 class msfValidator(Validator):
     """
@@ -134,7 +163,8 @@ class OffPromptSession(PromptSession):
         super().__init__(history=_history, *args, **kwargs)
         self.completer = WordCompleter(self.wordlist, ignore_case=True)
         self.enable_history_search = True
-        self.auto_suggest = AutoSuggestFromHistory()
+        #self.auto_suggest = AutoSuggestFromHistory()
+        self.auto_suggest = MsfAutoSuggest(self.msf_console, self.wordlist)
         # self.validator = msfValidator()
 
     def handle_input(self, text):
