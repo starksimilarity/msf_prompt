@@ -18,9 +18,9 @@ from msf_prompt_styles import msf_style, get_prompt_text
 # future: add setuptools
 
 # The file that stores user permissions for modules
-USER_MODULE_FILE = "user_module_list.pickle"
+DEFAULT_USER_MODULE_FILE = "user_module_list.pickle"
 # The file that stores list of valid targets
-ALLOWED_TARGETS_FILE = "allowed_targets.pickle"
+DEFAULT_ALLOWED_TARGETS_FILE = "allowed_targets.pickle"
 
 
 class InvalidTargetError(Exception):
@@ -68,6 +68,11 @@ class OffPromptSession(PromptSession):
         console session for MetasploitFramework
     wordlist : list
         list of words to populate the completer
+    module_filename : str
+        filename of the file that maps users to allowed modules
+    target_filename : str
+        filename of the file that defines allowed targets
+        
 
     Methods
     -------
@@ -81,11 +86,21 @@ class OffPromptSession(PromptSession):
         Returns list of allowed modules for a given user.
     """
 
+    # future: make this an instance variable?
     wordlist = []
     with open("word_suggestions.txt", "r+") as infi:
         wordlist = infi.read().strip().split(",")
 
-    def __init__(self, console, hist_name=None, allow_overrides=False, *args, **kwargs):
+    def __init__(
+        self,
+        console,
+        hist_name=None,
+        allow_overrides=False,
+        module_filename=None,
+        target_filename=None,
+        *args,
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -95,17 +110,26 @@ class OffPromptSession(PromptSession):
             string name to the command history file
         allow_overrides : Bool, optional
             flag to determine if user can override warnings for target and module errors
+        module_filename 
+            filename of the file that maps users to allowed modules
+        target_filename : str, optional
+            filename of the file that defines allowed targets
+            
         *args, **kwargs:
             args to override default PromptSession behavoir
         """
 
         self.msf_console = console
         self._allow_overrides = allow_overrides
-        # self.history=None
-        # try:
-        #    self.history = FileHistory(hist_name)
-        # except Exception as e:
-        #    logging.info('probably no hist_name passed; in-memory history only')
+        if module_filename:
+            self._module_filename = module_filename
+        else:
+            self._module_filename = DEFAULT_USER_MODULE_FILE
+        if target_filename:
+            self._target_filename = target_filename
+        else:
+            self._target_filename = DEFAULT_ALLOWED_TARGETS_FILE
+
         _history = FileHistory(hist_name)
         super().__init__(history=_history, *args, **kwargs)
         self.completer = WordCompleter(self.wordlist, ignore_case=True)
@@ -318,6 +342,14 @@ class OffPromptSession(PromptSession):
     def allow_overrides(self):
         return self._allow_overrides
 
+    @property
+    def target_filename(self):
+        return self._target_filename
+
+    @property
+    def module_filename(self):
+        return self._module_filename
+
     def allowed_modules(self, user):
         """
         Returns list of allowed modules for a given user.
@@ -335,7 +367,7 @@ class OffPromptSession(PromptSession):
 
         # future: make this a DB not a pickle
         module_list = []
-        with open(USER_MODULE_FILE, "rb") as infi:
+        with open(self.module_filename, "rb") as infi:
             module_list = pickle.load(infi)
 
         return module_list.get(user, []) + module_list.get("ALL", [])
@@ -346,7 +378,7 @@ class OffPromptSession(PromptSession):
         """
         tgts = []
         try:
-            with open(ALLOWED_TARGETS_FILE, "rb") as infi:
+            with open(self.target_filename, "rb") as infi:
                 tgts = pickle.load(infi)
         except Exception as e:
             print(e)
