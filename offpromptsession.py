@@ -302,7 +302,14 @@ class OffPromptSession(PromptSession):
         # future: allow wildcards in allowed list
         user_allowed_modules = self.allowed_modules(self.current_user)
 
-        if module not in user_allowed_modules:
+        if module not in user_allowed_modules:  # simple exact check
+            for allowed_module in user_allowed_modules:
+                # loop through modules that have a wildcard and see if the requested module starts with that
+                # shortcut the loop and return True if found; otherwise the loop will end and raise an error
+                # future: there's probably a more elegant/performant way to do this
+                if "*" in allowed_module:
+                    if module.startswith(allowed_module.strip("*")):
+                        return True
             raise InvalidPermissionError(
                 f"Warning user does not have permission to run {module}"
             )
@@ -330,13 +337,13 @@ class OffPromptSession(PromptSession):
             module_list.get(user, []) + module_list.get('ALL', [])
                 List of approved modules for a given user and all users, otherwise empty list
         """
-        
+
         # future: make this a DB not a pickle
         module_list = []
         with open(USER_MODULE_FILE, "rb") as infi:
             module_list = pickle.load(infi)
 
-        return module_list.get(user, []) + module_list.get('ALL', [])
+        return module_list.get(user, []) + module_list.get("ALL", [])
 
     @property
     def allowed_targets(self):
