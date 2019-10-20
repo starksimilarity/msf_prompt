@@ -24,6 +24,11 @@ sess = offpromptsession.OffPromptSession(console)
 sess.prompt() #interact
 ```
 
+To modify users/targets
+```bash
+> python usr_tgt_mod.py
+```
+
 
 ## Module Interactions
 ![Module Interations](msf_prompt_flow.png)
