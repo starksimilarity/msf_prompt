@@ -16,7 +16,12 @@ As a module
 import offpromptsession 
 import pymetasploit3
 
-sess = offpromptsession.OffPromptSession(pymetasploit3.msfrpc.MsfRpcClient())
+
+client = pymetasploit3.msfrpc.MsfRpcClient()
+console = pymetasploit3.msfconsole.MsfRpcConsole(client)
+sess = offpromptsession.OffPromptSession(console)
+
+sess.prompt() #interact
 ```
 
 ## License

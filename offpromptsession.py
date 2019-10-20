@@ -13,9 +13,6 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.validation import Validator, ValidationError
 from prompt_toolkit.shortcuts import yes_no_dialog
 
-import pymetasploit3.msfrpc as msfrpc
-import pymetasploit3.msfconsole as msfconsole
-
 from msf_prompt_styles import msf_style, get_prompt_text
 
 # future: add setuptools
