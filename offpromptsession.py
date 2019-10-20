@@ -296,7 +296,6 @@ class OffPromptSession(PromptSession):
         """
 
         # future: get user allowed modules from db
-        # future: allow wildcards in allowed list
         user_allowed_modules = self.allowed_modules(self.current_user)
 
         if module not in user_allowed_modules:  # simple exact check
