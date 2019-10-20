@@ -27,7 +27,6 @@ sess.prompt() #interact
 
 ## Module Interactions
 ![Module Interations](msf_prompt_flow.png)
-Format: ![Alt Text](Module Interactions)
 
 ## License
 [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
