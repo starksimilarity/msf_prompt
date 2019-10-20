@@ -1,0 +1,21 @@
+#Set parameters for how the connection to msfrpcd is made (e.g. username, IP, port, etc)
+# or parameters for how the prompt behaves (e.g. allow user to override)
+#
+# Command line args override values in this file
+# Precedence: command line params > config file > defaults
+#
+# Format = parameter:value #comment
+
+#Connection Options
+username:msf                                #Username for msfrpcd
+password:password                           #password for msfrpcd
+server:127.0.0.1                            #IP addr of msfrpcd
+port:55553                                  #port of msfrpcd
+ssl:True                                    #Use SSL for the msfrpcd connection
+
+#Prompt Options
+allow_overrides:True                        #allow user to override target/permission warnings
+history_file: ".off_prompt_hist"             #history of user commands
+log_file: ".off_prompt_log"                  #log file
+target_file: "allowed_targets.pickle"        #target list
+user_perm_file:"user_module_list.pickle"    #list of modules allowed for users

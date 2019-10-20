@@ -84,7 +84,6 @@ class OffPromptSession(PromptSession):
     wordlist = []
     with open("word_suggestions.txt", "r+") as infi:
         wordlist = infi.read().strip().split(",")
-        print(wordlist)
 
     def __init__(self, console, hist_name=None, allow_overrides=False, *args, **kwargs):
         """
