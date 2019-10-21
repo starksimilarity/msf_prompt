@@ -16,7 +16,7 @@ setup(
     description="A Python library that emulates the Metasploit Framework msfconsole",
     license="GPL",
     packages=find_packages(),
-    scripts=["usr_tgt_mod.py"],
+    scripts=["msf_prompt/usr_tgt_mod.py"],
     install_requires=["pymetasploit3>=1.0", "prompt_toolkit>=2.0", "setuptools"],
     python_requires=">=3.6.0",
     # package_data = [""], # consider for the pickle files
