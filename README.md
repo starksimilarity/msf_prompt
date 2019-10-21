@@ -6,6 +6,14 @@ pymetasploit3: (https://github.com/DanMcInerney/pymetasploit3)
 
 prompt_toolkit: (https://github.com/prompt-toolkit/python-prompt-toolkit)
 
+
+Primary Features include:
+- Increased Logging
+- Auto-suggest completion based on history, word-list, msf tab-completes
+- Ability to control which modules a user can run
+- Ability to restrict RHOSTS to white-listed IPs
+- Ability to allow/disallow users from overriding module/IP warnings
+
 ## Installation
 
 Tested from a clean install of Ubuntu 18.04:
