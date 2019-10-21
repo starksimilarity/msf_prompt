@@ -10,20 +10,18 @@ Description: msf_prompt is a Python library that emulates the msfconsole by wrap
 from .utils import *
 from .offpromptsession import *
 
-__version__ = '0.1a'
-VERSION = tuple(__version__.split('.'))
+__version__ = "0.1a"
+VERSION = tuple(__version__.split("."))
 
 __all__ = [
-    #Utils.
-    'parseargs',
-    'parseconfig',
-
-    #Offpromptsession.
-    'MsfAutoSuggest',
-    'OffPromptSession',
-    'InvalidTargetError',
-    'InvalidPermissionError',
-    'UserOverride',
-    'UserOverrideDenied',
+    # Utils.
+    "parseargs",
+    "parseconfig",
+    # Offpromptsession.
+    "MsfAutoSuggest",
+    "OffPromptSession",
+    "InvalidTargetError",
+    "InvalidPermissionError",
+    "UserOverride",
+    "UserOverrideDenied",
 ]
-
