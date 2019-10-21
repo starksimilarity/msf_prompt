@@ -3,3 +3,4 @@
 .off_prompt_log
 __pycache__/*
 *.swp
+*.pyc
