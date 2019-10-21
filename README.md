@@ -7,6 +7,16 @@ prompt_toolkit: (https://github.com/prompt-toolkit/python-prompt-toolkit)
 
 ## Installation
 
+Tested from a clean install of Ubuntu 18.04:
+```bash
+> sudo apt-get install python3
+> sudo apt-get install python3-pip
+> pip3 install setuptools
+> sudo apt-get install git
+> git clone https://github.com/starksimilarity/msf_prompt.git
+> sudo python3 setup.py install
+```
+
 ## Usage
 
 Stand-alone
