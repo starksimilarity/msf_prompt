@@ -250,7 +250,11 @@ class OffPromptSession(PromptSession):
 
             if lower_text.startswith("exploit"):
                 """getting the attributes of the module is going to be difficult;
-                instead the program will check against valid list when user enters; investigate more"""
+                instead the program will check against valid list when user enters; investigate more
+
+                turns out you can run console.execute("get [parameter (e.g. rhost)]") and you'll get
+                the answer back in as: "[parameter] => [value]"; need to look into this more
+                """
                 # validate targets
                 # validate user permissions
 
