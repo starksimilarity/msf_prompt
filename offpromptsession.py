@@ -116,7 +116,7 @@ class MsfAutoSuggest(AutoSuggestFromHistory):
     # def get_suggestion_async
 
 
-class msfValidator(Validator):
+class MsfValidator(Validator):
     """
     Implements Validator ABC.  Ensures input into the msf_prompt passes certain checks
     (e.g. valid target, user has permission for tool, etc)
