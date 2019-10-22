@@ -25,6 +25,7 @@ sudo apt-get install python3-pip
 pip3 install setuptools
 sudo apt-get install git
 git clone https://github.com/starksimilarity/msf_prompt.git
+cd msf_prompt
 sudo python3 setup.py install
 ```
 
