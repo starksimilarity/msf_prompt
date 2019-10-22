@@ -41,22 +41,57 @@ class UserOverrideDenied(Exception):
     pass
 
 class MsfCompleter(Completer):
+    """Class used for suggesting tab-complete strings to user
+
+    MsfCompleter implements the CompleterABC and returns tab-completions based
+    on what the msfrpc console returns from the 'tabs' method. The completer strips away
+    anything after the next '/' so that the user isn't inundated with thousands of
+    suggestions and instead just what the next word should be.
+
+    Attributes
+    ----------
+    console : pymetasploit3.MsfRpcConsole
+        current console that can be used to search through tab-complete
+
+    Methods
+    -------
+    get_completions(self, document, compete_event)
+        Main callback from when the user hits <tab>
+    """
     def __init__(self, console):
         self.console = console
 
     def get_completions(self, document, complete_event):
+        """Main callback from when a complete_event occurs (usually when the user hits <tab>)
+
+        Parameters
+        ----------
+        buffer : prompt_toolkit.buffer.Buffer
+        complete_event : prompt_toolkit.completion.CompleteEvent
+
+        Yields
+        ------
+        _ : prompt_toolkit.completion.Completion
+            single suggestion to the user wrapped by a Completion class
+        """
+        
+        #main call to the rpc hook to get what msfrpcd thinks is a propper tab-complete
         full_completions = self.console.console.tabs(document.text)
 
         already_suggested = [] # keeps track of things already suggested to the user between yields
         for a in full_completions:
-            partial_completion = a[len(document.text):].split('/')[0]
-            first_half = re.split('[ /]', a[:len(document.text)])[-1]
+            partial_completion = a[len(document.text):].split('/')[0] #from the cursor to the next '/'
+            first_half = re.split('[ /]', a[:len(document.text)])[-1] #from the beginning of word to cursor
             comp = first_half + partial_completion
             if comp in already_suggested:
+                # prevents duplicates from being suggested to the user
+                # "already_suggested gets cleared on each time a CompleteEvent is called
                 continue
             else:
                 already_suggested.append(comp)
+                #yield the entire text and input the text at the beginning of where the word begins
                 yield Completion(comp, -len(first_half))
+
 
 class MsfAutoSuggest(AutoSuggestFromHistory):
     """Class used for suggesting auto_complete strings to the user
