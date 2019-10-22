@@ -312,6 +312,28 @@ class OffPromptSession(PromptSession):
             ):  # BUG: probably some bad side effects here (i.e. exitting session instead of shell)
                 exit(0)
 
+            #handle when user wants to interact with a session
+            if lower_text.startswith("sessions -i"):
+                # In most cases, the goal is to offload most of the execution logic to msfrpcd, 
+                # but in this case extra logic is needed to handle the creation of a new shell 
+
+                # find which session the user wants to interact with
+                try:
+                    requested_session = re.findall('sessions? -i\W+([0-9]{1,9})', lower_text)[0]
+                    if requested_session in self.msf_console.console.rpc.sessions.list.keys():
+                        # found valid session, now do something
+                        # create a new object for them to interact with
+                        # somehow gracefully get back to msfconsole when they exit?
+                        pass
+                    else:
+                        print(f"[-] Invalid session identifier: {requested_session}")
+                except Exception as e:
+                    print(e)
+                    logging.warning(f"<<< {str(e)}")
+                    
+                #for now, raise an execption so execution doesn't occur
+                raise Exception("Interacting with sessions is not currently supported")
+
             if lower_text.startswith("exploit"):
                 """getting the attributes of the module is going to be difficult;
                 instead the program will check against valid list when user enters; investigate more

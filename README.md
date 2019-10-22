@@ -7,7 +7,7 @@ pymetasploit3: (https://github.com/DanMcInerney/pymetasploit3)
 prompt_toolkit: (https://github.com/prompt-toolkit/python-prompt-toolkit)
 
 
-Primary Features include:
+## Primary Features Include:
 - Not Ruby
 - Auto-suggest completion based on history, word-list, msf tab-completes
   - ![Auto-Suggest](docs/images/auto_complete.png)
