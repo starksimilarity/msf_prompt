@@ -11,6 +11,7 @@ Primary Features include:
 - Not Ruby
 - Increased Logging
 - Auto-suggest completion based on history, word-list, msf tab-completes
+- Smarter tab-completion
 - Ability to control which modules a user can run
 - Ability to restrict RHOSTS to white-listed IPs
 - Ability to allow/disallow users from overriding module/IP warnings
@@ -56,7 +57,7 @@ To modify users/targets
 
 
 ## Module Interactions
-![Module Interations](msf_prompt_flow.png)
+![Module Interations](docs/images/msf_prompt_flow.png)
 
 ## License
 [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
