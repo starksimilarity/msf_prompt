@@ -6,7 +6,12 @@ import os
 import pickle
 
 from prompt_toolkit import PromptSession, HTML
-from prompt_toolkit.completion import WordCompleter, Completer, Completion, merge_completers
+from prompt_toolkit.completion import (
+    WordCompleter,
+    Completer,
+    Completion,
+    merge_completers,
+)
 from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import *
@@ -40,6 +45,7 @@ class UserOverride(Exception):
 class UserOverrideDenied(Exception):
     pass
 
+
 class MsfCompleter(Completer):
     """Class used for suggesting tab-complete strings to user
 
@@ -58,6 +64,7 @@ class MsfCompleter(Completer):
     get_completions(self, document, compete_event)
         Main callback from when the user hits <tab>
     """
+
     def __init__(self, console):
         self.console = console
 
@@ -74,14 +81,20 @@ class MsfCompleter(Completer):
         _ : prompt_toolkit.completion.Completion
             single suggestion to the user wrapped by a Completion class
         """
-        
-        #main call to the rpc hook to get what msfrpcd thinks is a propper tab-complete
+
+        # main call to the rpc hook to get what msfrpcd thinks is a propper tab-complete
         full_completions = self.console.console.tabs(document.text)
 
-        already_suggested = [] # keeps track of things already suggested to the user between yields
+        already_suggested = (
+            []
+        )  # keeps track of things already suggested to the user between yields
         for a in full_completions:
-            partial_completion = a[len(document.text):].split('/')[0] #from the cursor to the next '/'
-            first_half = re.split('[ /]', a[:len(document.text)])[-1] #from the beginning of word to cursor
+            partial_completion = a[len(document.text) :].split("/")[
+                0
+            ]  # from the cursor to the next '/'
+            first_half = re.split("[ /]", a[: len(document.text)])[
+                -1
+            ]  # from the beginning of word to cursor
             comp = first_half + partial_completion
             if comp in already_suggested:
                 # prevents duplicates from being suggested to the user
@@ -89,7 +102,7 @@ class MsfCompleter(Completer):
                 continue
             else:
                 already_suggested.append(comp)
-                #yield the entire text and input the text at the beginning of where the word begins
+                # yield the entire text and input the text at the beginning of where the word begins
                 yield Completion(comp, -len(first_half))
 
 
@@ -261,13 +274,10 @@ class OffPromptSession(PromptSession):
 
         _history = FileHistory(hist_name)
         super().__init__(history=_history, *args, **kwargs)
-        
-        #Use both a Word Completer and MsfCompleter for tab-completion
-        wCompleter = WordCompleter(self.wordlist, ignore_case=True)
+
         msfCompleter = MsfCompleter(self.msf_console)
-        combined_completer = merge_completers([wCompleter, msfCompleter])
-        self.completer = combined_completer
-        
+        self.completer = msfCompleter 
+
         self.enable_history_search = True
         self.auto_suggest = MsfAutoSuggest(self.msf_console, self.wordlist)
 
