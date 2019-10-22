@@ -9,12 +9,15 @@ prompt_toolkit: (https://github.com/prompt-toolkit/python-prompt-toolkit)
 
 Primary Features include:
 - Not Ruby
-- Increased Logging
 - Auto-suggest completion based on history, word-list, msf tab-completes
+![Auto-Suggest](docs/images/auto_complete.png)
 - Smarter tab-completion
+![Tab Complete](docs/images/tab_complete.png)
 - Ability to control which modules a user can run
 - Ability to restrict RHOSTS to white-listed IPs
 - Ability to allow/disallow users from overriding module/IP warnings
+- Increased Logging
+![Logging](docs/images/logging.png)
 - Not Ruby
 
 ## Installation
