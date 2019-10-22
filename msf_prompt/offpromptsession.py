@@ -276,7 +276,7 @@ class OffPromptSession(PromptSession):
         super().__init__(history=_history, *args, **kwargs)
 
         msfCompleter = MsfCompleter(self.msf_console)
-        self.completer = msfCompleter 
+        self.completer = msfCompleter
 
         self.enable_history_search = True
         self.auto_suggest = MsfAutoSuggest(self.msf_console, self.wordlist)
