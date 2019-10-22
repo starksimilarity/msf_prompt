@@ -20,8 +20,6 @@ from prompt_toolkit.shortcuts import yes_no_dialog
 
 from msf_prompt_styles import msf_style, get_prompt_text
 
-# future: add setuptools
-
 # The file that stores user permissions for modules
 DEFAULT_USER_MODULE_FILE = "configs/user_module_list.pickle"
 # The file that stores list of valid targets
