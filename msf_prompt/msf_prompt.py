@@ -24,7 +24,6 @@ def main():
         opts = parseconfig(CONFIG_FILENAME)
         opts.update(o.__dict__)  # override config values with commandline
 
-        print(opts)
         logging.basicConfig(
             filename=opts.get("log_file", LOGGING_FILENAME),
             format="===================\n%(asctime)s\n%(message)s",
