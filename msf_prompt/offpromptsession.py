@@ -24,6 +24,8 @@ DEFAULT_USER_MODULE_FILE = "configs/user_module_list.pickle"
 DEFAULT_ALLOWED_TARGETS_FILE = "configs/allowed_targets.pickle"
 # The file that contains a list of standard msfconsole commands
 DEFAULT_COMPLETER_WORDLIST = "configs/word_suggestions.txt"
+# The file that contains the list of user command history
+DEFAULT_COMPLETER_WORDLIST = ".off_prompt_hist"
 
 
 class InvalidTargetError(Exception):
@@ -198,6 +200,8 @@ class OffPromptSession(PromptSession):
 
     Attributes
     ----------
+    active_shell : OffPromptShellSession
+        the shell the user has chosen to interact with
     auto_suggest : prompt_toolkit.auto_suggest.AutoSuggestFromHistory
         auto populate line based on user's history
     completer : prompt_toolkit.completion.WordCompleter
@@ -261,6 +265,7 @@ class OffPromptSession(PromptSession):
 
         self.msf_console = console
         self._allow_overrides = allow_overrides
+        self.active_shell = None
         if module_filename:
             self._module_filename = module_filename
         else:
@@ -269,8 +274,13 @@ class OffPromptSession(PromptSession):
             self._target_filename = target_filename
         else:
             self._target_filename = DEFAULT_ALLOWED_TARGETS_FILE
+        if hist_name:
+            self.hist_name = hist_name
+        else:
+            self.hist_name = DEFAULT_HISTORY_FILENAME
 
-        _history = FileHistory(hist_name)
+        _history = FileHistory(self.hist_name)
+
         super().__init__(history=_history, *args, **kwargs)
 
         msfCompleter = MsfCompleter(self.msf_console)
@@ -307,27 +317,30 @@ class OffPromptSession(PromptSession):
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
 
-            if (
+            if self.active_shell:
+                self.active_shell.handle_input(text)
+                # break out of this so that the command is not executed in the msfconsole context
+
+            elif (
                 lower_text == "exit"
             ):  # BUG: probably some bad side effects here (i.e. exitting session instead of shell)
                 exit(0)
 
-            # handle when user wants to interact with a session
-            if lower_text.startswith("sessions -i"):
-                # In most cases, the goal is to offload most of the execution logic to msfrpcd,
-                # but in this case extra logic is needed to handle the creation of a new shell
+            #handle when user wants to interact with a session
+            elif lower_text.startswith("sessions -i"):
+                # In most cases, the goal is to offload most of the execution logic to msfrpcd, 
+                # but in this case extra logic is needed to handle the creation of a new shell 
 
                 # find which session the user wants to interact with
                 try:
-                    requested_session = re.findall(
-                        "sessions? -i\W+([0-9]{1,9})", lower_text
-                    )[0]
-                    if (
-                        requested_session
-                        in self.msf_console.console.rpc.sessions.list.keys()
-                    ):
+                    requested_session = re.findall('sessions? -i\W+([0-9]{1,9})', lower_text)[0]
+                    if requested_session in self.msf_console.console.rpc.sessions.list.keys():
+                        # Create new MsfSession (either MeterpreterSession or ShellSession)
                         # found valid session, now do something
+                        shell = self.msf_console.console.rpc.sessions.session(requested_session)
                         # create a new object for them to interact with
+                        shellSession = OffPromptShellSession(shell, self.msf_console, hist_name = self.hist_name)
+                        self.active_shell = shellSession
                         # somehow gracefully get back to msfconsole when they exit?
                         pass
                     else:
@@ -335,11 +348,11 @@ class OffPromptSession(PromptSession):
                 except Exception as e:
                     print(e)
                     logging.warning(f"<<< {str(e)}")
-
-                # for now, raise an execption so execution doesn't occur
+                    
+                #for now, raise an execption so execution doesn't occur
                 raise Exception("Interacting with sessions is not currently supported")
 
-            if lower_text.startswith("exploit"):
+            elif lower_text.startswith("exploit"):
                 """getting the attributes of the module is going to be difficult;
                 instead the program will check against valid list when user enters; investigate more
 
@@ -569,19 +582,24 @@ class OffPromptShellSession(OffPromptSession):
     """Extension of OffPromptSession used for shells from targets
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, shell, console, *args, **kwargs):
         """The OffPromptSession comes with a lot of functionality that standard shells
         won't have so this init will turn a lot of them off.
 
         # future : consider a refactor where there is a more basic superclass and the 
         subclasses implement more, not the other way around
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(console, *args, **kwargs)
         self.completer = None
         self.enable_history_search = False
-        self.auto_suggest = None
+        self.auto_suggest = None 
         self._prompt_text = "unknown-shell > "
+        self.console = console
+        self.shell = shell
 
     @property
     def prompt_text(self):
         return self._prompt_text
+
+    def handle_input(self, text):
+        pass

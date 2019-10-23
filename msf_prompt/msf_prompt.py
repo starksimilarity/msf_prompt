@@ -49,11 +49,16 @@ def main():
     # main user input loop
     while True:
         try:
+            # check to see if the user is in an interactive shell from a victim
+            if sess.active_shell:
+                user_input = sess.prompt(sess.active_shell.prompt_text)
+                sess.handle_input(user_input)
             # get_formatted_prompt and msf_style are imported
-            user_input = sess.prompt(
-                get_formatted_prompt(sess.prompt_text), style=msf_style
-            )
-            sess.handle_input(user_input)
+            else:
+                user_input = sess.prompt(
+                    get_formatted_prompt(sess.prompt_text), style=msf_style
+                )
+                sess.handle_input(user_input)
         except KeyboardInterrupt:
             continue
         except EOFError:
