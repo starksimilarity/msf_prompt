@@ -45,6 +45,8 @@ class UserOverrideDenied(Exception):
 
 
 class ShellExitError(Exception):
+    """Raised when a user is in a shell and then exits back to the main console
+    """
     pass
 
 

@@ -50,6 +50,7 @@ def main():
     while True:
         try:
             # check to see if the user is in an interactive shell from a victim
+            # future: remove the need to know if the user is in an active shell
             if sess.active_shell:
                 user_input = sess.prompt(sess.active_shell.prompt_text)
                 sess.handle_input(user_input)
