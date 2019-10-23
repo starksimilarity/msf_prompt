@@ -14,7 +14,7 @@ msf_style = Style.from_dict(
 )
 
 
-def get_prompt_text(raw_text):
+def get_formatted_prompt(raw_text):
     """
     Get formatted prompt from msfrpc prompt
 

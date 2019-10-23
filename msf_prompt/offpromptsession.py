@@ -18,8 +18,6 @@ from prompt_toolkit.auto_suggest import *
 from prompt_toolkit.validation import Validator, ValidationError
 from prompt_toolkit.shortcuts import yes_no_dialog
 
-from msf_prompt_styles import msf_style, get_prompt_text
-
 # The file that stores user permissions for modules
 DEFAULT_USER_MODULE_FILE = "configs/user_module_list.pickle"
 # The file that stores list of valid targets
@@ -204,14 +202,16 @@ class OffPromptSession(PromptSession):
         auto populate line based on user's history
     completer : prompt_toolkit.completion.WordCompleter
         suggests completion to user based on string currently typed
-    msf_console : pymetasploit3.msfconsole.MsfRpcConsole
-        console session for MetasploitFramework
-    wordlist : list
-        list of words to populate the completer
     module_filename : str
         filename of the file that maps users to allowed modules
+    msf_console : pymetasploit3.msfconsole.MsfRpcConsole
+        console session for MetasploitFramework
+    prompt_text : str
+        string that represents what should be displayed to user at the prompt
     target_filename : str
         filename of the file that defines allowed targets
+    wordlist : list
+        list of words to populate the completer
         
 
     Methods
@@ -498,7 +498,7 @@ class OffPromptSession(PromptSession):
                     if module.startswith(allowed_module.strip("*")):
                         return True
             raise InvalidPermissionError(
-                f"Warning user does not have permission to run {module}"
+                f"Warning {self.current_user} does not have permission to run {module}"
             )
         return True
 
@@ -552,3 +552,31 @@ class OffPromptSession(PromptSession):
             print(e)
             logging.warning(f"<<< {str(e)}")
         return tgts
+
+    @property
+    def prompt_text(self):
+        """rpc call through the MsfRpcConsole to get the current prompt
+        """
+        return self.msf_console.prompt
+
+
+class OffPromptShellSession(OffPromptSession):
+    """Extension of OffPromptSession used for shells from targets
+    """
+
+    def __init__(self, *args, **kwargs):
+        """The OffPromptSession comes with a lot of functionality that standard shells
+        won't have so this init will turn a lot of them off.
+
+        # future : consider a refactor where there is a more basic superclass and the 
+        subclasses implement more, not the other way around
+        """
+        super().__init__(*args, **kwargs)
+        self.completer = None
+        self.enable_history_search = False
+        self.auto_suggest = None 
+        self._prompt_text = "unknown-shell > "
+
+    @property
+    def prompt_text(self):
+        return self._prompt_text

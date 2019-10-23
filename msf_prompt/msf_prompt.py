@@ -8,7 +8,7 @@ import pymetasploit3.msfrpc as msfrpc
 import pymetasploit3.msfconsole as msfconsole
 
 from offpromptsession import OffPromptSession
-from msf_prompt_styles import msf_style, get_prompt_text
+from msf_prompt_styles import msf_style, get_formatted_prompt
 from utils import parseargs, parseconfig
 
 # future: add setuptools
@@ -49,9 +49,9 @@ def main():
     # main user input loop
     while True:
         try:
-            # get_prompt_text and msf_style are imported
+            # get_formatted_prompt and msf_style are imported
             user_input = sess.prompt(
-                get_prompt_text(sess.msf_console.prompt), style=msf_style
+                get_formatted_prompt(sess.prompt_text), style=msf_style
             )
             sess.handle_input(user_input)
         except KeyboardInterrupt:
