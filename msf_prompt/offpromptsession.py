@@ -599,7 +599,7 @@ class OffPromptSession(PromptSession):
         """rpc call through the MsfRpcConsole to get the current prompt
         """
         if self.active_shell:
-            return active_shell.prompt_text
+            return self.active_shell.prompt_text
         else:
             return self.msf_console.prompt
 
