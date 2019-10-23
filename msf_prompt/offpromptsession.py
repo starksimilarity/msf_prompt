@@ -181,9 +181,6 @@ class MsfAutoSuggest(AutoSuggestFromHistory):
                         )  # take the first one and suggest the rest of the word
         return suggestion
 
-    # future
-    # def get_suggestion_async
-
 
 class MsfValidator(Validator):
     """
