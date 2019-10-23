@@ -44,6 +44,10 @@ class UserOverrideDenied(Exception):
     pass
 
 
+class ShellExitError(Exception):
+    pass
+
+
 class MsfCompleter(Completer):
     """Class used for suggesting tab-complete strings to user
 
@@ -318,132 +322,148 @@ class OffPromptSession(PromptSession):
             )  # temp variable to prevent re-writing text.lower().strip() all the time
 
             if self.active_shell:
-                self.active_shell.handle_input(text)
-                # break out of this so that the command is not executed in the msfconsole context
-
-            elif (
-                lower_text == "exit"
-            ):  # BUG: probably some bad side effects here (i.e. exitting session instead of shell)
-                exit(0)
-
-            #handle when user wants to interact with a session
-            elif lower_text.startswith("sessions -i"):
-                # In most cases, the goal is to offload most of the execution logic to msfrpcd, 
-                # but in this case extra logic is needed to handle the creation of a new shell 
-
-                # find which session the user wants to interact with
                 try:
-                    requested_session = re.findall('sessions? -i\W+([0-9]{1,9})', lower_text)[0]
-                    if requested_session in self.msf_console.console.rpc.sessions.list.keys():
-                        # Create new MsfSession (either MeterpreterSession or ShellSession)
-                        # found valid session, now do something
-                        shell = self.msf_console.console.rpc.sessions.session(requested_session)
-                        # create a new object for them to interact with
-                        shellSession = OffPromptShellSession(shell, self.msf_console, hist_name = self.hist_name)
-                        self.active_shell = shellSession
-                        # somehow gracefully get back to msfconsole when they exit?
+                    self.active_shell.handle_input(text)
+                except ShellExitError as e:
+                    # BUG: is there a memory leak here....?
+                    self.active_shell = None
+            else:
+
+                if (
+                    lower_text == "exit"
+                ):  # BUG: probably some bad side effects here (i.e. exitting session instead of shell)
+                    exit(0)
+
+                # handle when user wants to interact with a session
+                elif lower_text.startswith("sessions -i"):
+                    # In most cases, the goal is to offload most of the execution logic to msfrpcd,
+                    # but in this case extra logic is needed to handle the creation of a new shell
+
+                    # find which session the user wants to interact with
+                    try:
+                        requested_session = re.findall(
+                            "sessions? -i\W+([0-9]{1,9})", lower_text
+                        )[0]
+                        if (
+                            requested_session
+                            in self.msf_console.console.rpc.sessions.list.keys()
+                        ):
+                            # Create new MsfSession (either MeterpreterSession or ShellSession)
+                            # found valid session, now do something
+                            shell = self.msf_console.console.rpc.sessions.session(
+                                requested_session
+                            )
+                            # create a new object for them to interact with
+                            shellSession = OffPromptShellSession(
+                                shell, self.msf_console, hist_name=self.hist_name
+                            )
+                            self.active_shell = shellSession
+                            # somehow gracefully get back to msfconsole when they exit?
+                        else:
+                            print(
+                                f"[-] Invalid session identifier: {requested_session}"
+                            )
+                    except Exception as e:
+                        print(e)
+                        logging.warning(f"<<< {str(e)}")
+
+                    # for now, raise an execption so execution doesn't occur
+                    raise Exception(
+                        "Interacting with sessions is not currently supported"
+                    )
+
+                elif lower_text.startswith("exploit"):
+                    """getting the attributes of the module is going to be difficult;
+                    instead the program will check against valid list when user enters; investigate more
+
+                    turns out you can run console.execute("get [parameter (e.g. rhost)]") and you'll get
+                    the answer back in as: "[parameter] => [value]"; need to look into this more
+                    """
+                    # validate targets
+                    # validate user permissions
+
+                    # prompt for confirm if 'exploit'
+                    confirm = yes_no_dialog(
+                        title="Confirm Exploit", text="Confirm Submission"
+                    )
+                    if confirm:
                         pass
                     else:
-                        print(f"[-] Invalid session identifier: {requested_session}")
-                except Exception as e:
-                    print(e)
-                    logging.warning(f"<<< {str(e)}")
-                    
-                #for now, raise an execption so execution doesn't occur
-                raise Exception("Interacting with sessions is not currently supported")
+                        raise Exception("User aborted exploitation")
 
-            elif lower_text.startswith("exploit"):
-                """getting the attributes of the module is going to be difficult;
-                instead the program will check against valid list when user enters; investigate more
+                ############################################
+                # Validate rhost against allowed target file
+                ############################################
+                elif lower_text.startswith("set") and "rhost" in lower_text:
 
-                turns out you can run console.execute("get [parameter (e.g. rhost)]") and you'll get
-                the answer back in as: "[parameter] => [value]"; need to look into this more
-                """
-                # validate targets
-                # validate user permissions
+                    # find all IPs in 'set' command
+                    # future: add hostnames as well
+                    targets = re.findall("(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", text)
+                    try:
+                        self.validate_targets(targets)
 
-                # prompt for confirm if 'exploit'
-                confirm = yes_no_dialog(
-                    title="Confirm Exploit", text="Confirm Submission"
-                )
-                if confirm:
-                    pass
-                else:
-                    raise Exception("User aborted exploitation")
+                    except InvalidTargetError as e:
+                        print(e)
+                        logging.warning(f"<<< {str(e)}")
 
-            ############################################
-            # Validate rhost against allowed target file
-            ############################################
-            elif lower_text.startswith("set") and "rhost" in lower_text:
-
-                # find all IPs in 'set' command
-                # future: add hostnames as well
-                targets = re.findall("(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", text)
-                try:
-                    self.validate_targets(targets)
-
-                except InvalidTargetError as e:
-                    print(e)
-                    logging.warning(f"<<< {str(e)}")
-
-                    if self.allow_overrides:
-                        # ask user if they want to override the warning
-                        override = yes_no_dialog(
-                            title="Target Override",
-                            text="An invalid target was added; do you want to continue anyway?",
-                        )
-                        if override:
-                            raise UserOverride(
-                                f"{self.current_user} overrode warning: {e}"
+                        if self.allow_overrides:
+                            # ask user if they want to override the warning
+                            override = yes_no_dialog(
+                                title="Target Override",
+                                text="An invalid target was added; do you want to continue anyway?",
                             )
+                            if override:
+                                raise UserOverride(
+                                    f"{self.current_user} overrode warning: {e}"
+                                )
+                            else:
+                                raise UserOverrideDenied(
+                                    f"{self.current_user} chose not to overide warning: {e}"
+                                )
                         else:
                             raise UserOverrideDenied(
-                                f"{self.current_user} chose not to overide warning: {e}"
+                                f"{self.current_user} attempted disallowed action: {e}"
                             )
-                    else:
-                        raise UserOverrideDenied(
-                            f"{self.current_user} attempted disallowed action: {e}"
-                        )
 
-            #######################################################################
-            # Validate selected module against list of allowed modules for the user
-            #######################################################################
-            elif lower_text.startswith("use"):
-                try:
-                    module = re.findall("use (.*)", lower_text)[0]
-                    self.validate_user_perms(module)
-                except InvalidPermissionError as e:
-                    print(e)
-                    logging.warning(f"<<< {str(e)}")
+                #######################################################################
+                # Validate selected module against list of allowed modules for the user
+                #######################################################################
+                elif lower_text.startswith("use"):
+                    try:
+                        module = re.findall("use (.*)", lower_text)[0]
+                        self.validate_user_perms(module)
+                    except InvalidPermissionError as e:
+                        print(e)
+                        logging.warning(f"<<< {str(e)}")
 
-                    if self.allow_overrides:
-                        # ask user if they want to override the warning
-                        override = yes_no_dialog(
-                            title="User Module Permission Override",
-                            text="The current user does not have permission to run the selected module. \
-                                    Would you like to continue anyway?",
-                        )
-                        if override:
-                            raise UserOverride(
-                                f"{self.current_user} overrode warning: {e}"
+                        if self.allow_overrides:
+                            # ask user if they want to override the warning
+                            override = yes_no_dialog(
+                                title="User Module Permission Override",
+                                text="The current user does not have permission to run the selected module. \
+                                        Would you like to continue anyway?",
                             )
+                            if override:
+                                raise UserOverride(
+                                    f"{self.current_user} overrode warning: {e}"
+                                )
+                            else:
+                                raise UserOverrideDenied(
+                                    f"{self.current_user} chose not to overide warning: {e}"
+                                )
                         else:
                             raise UserOverrideDenied(
-                                f"{self.current_user} chose not to overide warning: {e}"
+                                f"{self.current_user} attempted disallowed action: {e}"
                             )
-                    else:
-                        raise UserOverrideDenied(
-                            f"{self.current_user} attempted disallowed action: {e}"
-                        )
 
-                except Exception as e:
-                    print(e)
-                    logging.warning(f"<<< {str(e)}")
+                    except Exception as e:
+                        print(e)
+                        logging.warning(f"<<< {str(e)}")
 
-            ######################
-            # finally do something
-            ######################
-            self.msf_console.execute(text)
+                ######################
+                # finally do something
+                ######################
+                self.msf_console.execute(text)
 
         except UserOverride as e:
             # user approved warning override
@@ -592,9 +612,9 @@ class OffPromptShellSession(OffPromptSession):
         super().__init__(console, *args, **kwargs)
         self.completer = None
         self.enable_history_search = False
-        self.auto_suggest = None 
+        self.auto_suggest = None
         self._prompt_text = "unknown-shell > "
-        self.console = console
+        self.parent_console = console
         self.shell = shell
 
     @property
@@ -602,4 +622,22 @@ class OffPromptShellSession(OffPromptSession):
         return self._prompt_text
 
     def handle_input(self, text):
-        pass
+
+        try:
+            lower_text = (
+                text.lower().strip()
+            )  # temp variable to prevent re-writing text.lower().strip() all the time
+
+            # Breakout of shell and set parent console to no active shell
+            # BUG: This probably has bad side-effects as currently implemented (e.g. nested shells)
+            if lower_text == "background" or lower_text == "exit":
+                raise ShellExitError(lower_text)
+
+            elif lower_text:
+                print(self.shell.run_with_output(text, "DummyString", timeout=10))
+        except ShellExitError as e:
+            # pass up to the next level to set the active_shell to None
+            raise e
+        except Exception as e:
+            print(e)
+            logging.warning(f"<<< {str(e)}")
