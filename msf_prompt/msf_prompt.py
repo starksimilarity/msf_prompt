@@ -11,7 +11,6 @@ from offpromptsession import OffPromptSession
 from msf_prompt_styles import msf_style, get_formatted_prompt
 from utils import parseargs, parseconfig
 
-# future: add setuptools
 
 CONFIG_FILENAME = "configs/prompt_config"
 HISTORY_FILENAME = ".off_prompt_hist"
@@ -50,16 +49,10 @@ def main():
     while True:
         try:
             # check to see if the user is in an interactive shell from a victim
-            # future: remove the need to know if the user is in an active shell
-            if sess.active_shell:
-                user_input = sess.prompt(sess.active_shell.prompt_text)
-                sess.handle_input(user_input)
-            # get_formatted_prompt and msf_style are imported
-            else:
-                user_input = sess.prompt(
-                    get_formatted_prompt(sess.prompt_text), style=msf_style
-                )
-                sess.handle_input(user_input)
+            user_input = sess.prompt(
+                get_formatted_prompt(sess.prompt_text), style=msf_style
+            )
+            sess.handle_input(user_input)
         except KeyboardInterrupt:
             continue
         except EOFError:

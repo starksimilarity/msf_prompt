@@ -598,7 +598,10 @@ class OffPromptSession(PromptSession):
     def prompt_text(self):
         """rpc call through the MsfRpcConsole to get the current prompt
         """
-        return self.msf_console.prompt
+        if self.active_shell:
+            return active_shell.prompt_text
+        else:
+            return self.msf_console.prompt
 
 
 class OffPromptShellSession(OffPromptSession):
