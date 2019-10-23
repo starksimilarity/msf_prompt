@@ -272,6 +272,7 @@ class OffPromptSession(PromptSession):
         self.msf_console = console
         self._allow_overrides = allow_overrides
         self.active_shell = None
+
         if module_filename:
             self._module_filename = module_filename
         else:
@@ -289,9 +290,7 @@ class OffPromptSession(PromptSession):
 
         super().__init__(history=_history, *args, **kwargs)
 
-        msfCompleter = MsfCompleter(self.msf_console)
-        self.completer = msfCompleter
-
+        self.completer = MsfCompleter(self.msf_console)
         self.enable_history_search = True
         self.auto_suggest = MsfAutoSuggest(self.msf_console, self.wordlist)
 
@@ -324,9 +323,11 @@ class OffPromptSession(PromptSession):
             )  # temp variable to prevent re-writing text.lower().strip() all the time
 
             if self.active_shell:
+                #send all input down to shell's handle_input function
                 try:
                     self.active_shell.handle_input(text)
                 except ShellExitError as e:
+                    # Shell has exited
                     # BUG: is there a memory leak here....?
                     self.active_shell = None
             else:
@@ -602,6 +603,18 @@ class OffPromptSession(PromptSession):
 
 class OffPromptShellSession(OffPromptSession):
     """Extension of OffPromptSession used for shells from targets
+
+    Launched when a user types "interact -i [#]" at the OffPromptSession console.
+    An OffPromptShellSession is much less featured than its parent and disables
+    the completer and auto_suggest since there's not a non-trivial way to do that with 
+    a generic shell.
+
+    Attributes
+    ----------
+    parent_console : OffPromptSession
+        unclear if this is a link to or a deep copy of the parent console
+    shell : pymetasploit3.msfrpc.ShellSession
+        The shell instance the user is interacting with
     """
 
     def __init__(self, shell, console, *args, **kwargs):
@@ -612,9 +625,12 @@ class OffPromptShellSession(OffPromptSession):
         subclasses implement more, not the other way around
         """
         super().__init__(console, *args, **kwargs)
+        # Turn off the normal OffPromptSession features
         self.completer = None
         self.enable_history_search = False
         self.auto_suggest = None
+
+        # There's currently no non-trivial way of getting the shell's prompt
         self._prompt_text = "unknown-shell > "
         self.parent_console = console
         self.shell = shell
@@ -624,7 +640,23 @@ class OffPromptShellSession(OffPromptSession):
         return self._prompt_text
 
     def handle_input(self, text):
-
+        """
+        Main callback for when the user submits input
+    
+        Parameters
+        ----------
+        text : str
+            The user-submitted command
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        ShellExitError 
+            Raised when the user wants to exit the shell and return to main msfconsole
+        """
         try:
             lower_text = (
                 text.lower().strip()
