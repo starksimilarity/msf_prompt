@@ -23,6 +23,8 @@ prompt_toolkit: (https://github.com/prompt-toolkit/python-prompt-toolkit)
 
 ## Installation
 
+WARNING: ipython does not play nicely with prompt_toolkit 2.0.  It's recommended to run this in a pyenv or separate vm if you care about ipython
+
 Tested from a clean install of Ubuntu 18.04:
 ```bash
 sudo apt-get install python3
