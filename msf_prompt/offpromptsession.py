@@ -297,10 +297,10 @@ class OffPromptSession(PromptSession):
         """Main callback for when the user submits input
 
         The main flow for this method is to:
-            - check if user is in an active shell (divert execution to shell if true)
-            - check for keywords that will divert execution ('exit', 'sessions -i')
-            - check for keywords that will trigger permission checks ('exploit', 'use', 'set rhost')
-            - execute
+            1) check if user is in an active shell (divert execution to shell if true)
+            2) check for keywords that will divert execution ('exit', 'sessions -i')
+            3) check for keywords that will trigger permission checks ('exploit', 'use', 'set rhost')
+            4) execute
     
         Parameters
         ----------
@@ -326,6 +326,7 @@ class OffPromptSession(PromptSession):
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
 
+            # 1) check if user is in an active shell (divert execution to shell if true) 
             if self.active_shell:
                 # send all input down to shell's handle_input function
                 try:
@@ -334,52 +335,53 @@ class OffPromptSession(PromptSession):
                     # Shell has exited
                     # BUG: is there a memory leak here....?
                     self.active_shell = None
-            else:
 
-                if (
-                    lower_text == "exit"
-                ):  
-                    raise EOFError("user typed exit") 
+            # 2) check for keywords that will divert execution ('exit', 'sessions -i')
+            elif lower_text == "exit":
+                raise EOFError("user typed exit")
 
-                # handle when user wants to interact with a session
-                elif lower_text.startswith("sessions -i"):
-                    # In most cases, the goal is to offload most of the execution logic to msfrpcd,
-                    # but in this case extra logic is needed to handle the creation of a new shell
 
-                    # find which session the user wants to interact with
-                    try:
-                        requested_session = re.findall(
-                            "sessions? -i\W+([0-9]{1,9})", lower_text
-                        )[0]
-                        if (
+            # handle when user wants to interact with a session
+            elif lower_text.startswith("sessions -i"):
+                # In most cases, the goal is to offload most of the execution logic to msfrpcd,
+                # but in this case extra logic is needed to handle the creation of a new shell
+
+                # find which session the user wants to interact with
+                try:
+                    requested_session = re.findall(
+                        "sessions? -i\W+([0-9]{1,9})", lower_text
+                    )[0]
+                    if (
+                        requested_session
+                        in self.msf_console.console.rpc.sessions.list.keys()
+                    ):
+                        # Create new MsfSession (either MeterpreterSession or ShellSession)
+                        # found valid session, now do something
+                        shell = self.msf_console.console.rpc.sessions.session(
                             requested_session
-                            in self.msf_console.console.rpc.sessions.list.keys()
-                        ):
-                            # Create new MsfSession (either MeterpreterSession or ShellSession)
-                            # found valid session, now do something
-                            shell = self.msf_console.console.rpc.sessions.session(
-                                requested_session
-                            )
-                            # create a new object for them to interact with
-                            shellSession = OffPromptShellSession(
-                                shell, self.msf_console, hist_name=self.hist_name
-                            )
-                            self.active_shell = shellSession
-                            # somehow gracefully get back to msfconsole when they exit?
-                        else:
-                            print(
-                                f"[-] Invalid session identifier: {requested_session}"
-                            )
-                    except Exception as e:
-                        print(e)
-                        logging.warning(f"<<< {str(e)}")
+                        )
+                        # create a new object for them to interact with
+                        shellSession = OffPromptShellSession(
+                            shell, self.msf_console, hist_name=self.hist_name
+                        )
+                        self.active_shell = shellSession
+                        # somehow gracefully get back to msfconsole when they exit?
+                    else:
+                        print(
+                            f"[-] Invalid session identifier: {requested_session}"
+                        )
+                except Exception as e:
+                    print(e)
+                    logging.warning(f"<<< {str(e)}")
 
-                    # for now, raise an execption so execution doesn't occur
-                    raise Exception(
-                        "Interacting with sessions is not currently supported"
-                    )
+                # for now, raise an execption so execution doesn't occur
+                raise Exception(
+                    "Interacting with sessions is not currently supported"
+                )
 
-                elif lower_text.startswith("exploit"):
+            else:
+                #3) check for keywords that will trigger permission checks ('exploit', 'use', 'set rhost')
+                if lower_text.startswith("exploit"):
                     """getting the attributes of the module is going to be difficult;
                     instead the program will check against valid list when user enters; investigate more
 
@@ -475,6 +477,7 @@ class OffPromptSession(PromptSession):
                 # this is a terrible way to account for the prompt printing before it's changed
                 # on the msfrpcd side, but sleeping for 1 second seems to reduce this error
                 sleep(1)
+
         except UserOverride as e:
             # user approved warning override
             # future consider sending this to alternate/remote logs
