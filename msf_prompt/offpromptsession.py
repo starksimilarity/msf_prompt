@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
-import string
+import ipaddress
 import logging
-import re
 import os
 import pickle
+import re
+import string
 from time import sleep
 
 from prompt_toolkit import PromptSession, HTML
@@ -513,7 +514,7 @@ class OffPromptSession(PromptSession):
         """
 
         for target in targets:
-            if target not in self.allowed_targets:
+            if ipaddress.ip_address(target) not in self.allowed_targets:
                 raise InvalidTargetError(f"Warning {target} is not on allowed list")
         return True
 
@@ -592,14 +593,28 @@ class OffPromptSession(PromptSession):
     @property
     def allowed_targets(self):
         """Loads and returns list of approved targets from ALLOWED_TARGET_FILE
+
+        This function assumes that the target file is a pickled list of ipaddresses and
+        subnets from the ipaddress module
+
+        Returns
+        -------
+        tgts : list[ipaddress.IPv4Address]
+            list of allowed IPv4 Addresses
         """
         tgts = []
         try:
             with open(self.target_filename, "rb") as infi:
-                tgts = pickle.load(infi)
+                tmp_tgts = pickle.load(infi)
+            for tgt in tmp_tgts:
+                if isinstance(tgt, ipaddress.IPv4Network):
+                    tgts.extend(tgt.hosts())
+                else:
+                    tgts.append(tgt)
         except Exception as e:
             print(e)
             logging.warning(f"<<< {str(e)}")
+
         return tgts
 
     @property
