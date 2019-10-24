@@ -4,6 +4,7 @@ import logging
 import re
 import os
 import pickle
+from time import sleep
 
 from prompt_toolkit import PromptSession, HTML
 from prompt_toolkit.completion import (
@@ -47,6 +48,7 @@ class UserOverrideDenied(Exception):
 class ShellExitError(Exception):
     """Raised when a user is in a shell and then exits back to the main console
     """
+
     pass
 
 
@@ -233,7 +235,6 @@ class OffPromptSession(PromptSession):
         Returns list of allowed modules for a given user.
     """
 
-    # future: make this an instance variable?
     wordlist = []
     with open(DEFAULT_COMPLETER_WORDLIST, "r+") as infi:
         wordlist = infi.read().strip().split(",")
@@ -292,8 +293,13 @@ class OffPromptSession(PromptSession):
         self.auto_suggest = MsfAutoSuggest(self.msf_console, self.wordlist)
 
     def handle_input(self, text):
-        """
-        Main callback for when the user submits input
+        """Main callback for when the user submits input
+
+        The main flow for this method is to:
+            - check if user is in an active shell (divert execution to shell if true)
+            - check for keywords that will divert execution ('exit', 'sessions -i')
+            - check for keywords that will trigger permission checks ('exploit', 'use', 'set rhost')
+            - execute
     
         Parameters
         ----------
@@ -320,7 +326,7 @@ class OffPromptSession(PromptSession):
             )  # temp variable to prevent re-writing text.lower().strip() all the time
 
             if self.active_shell:
-                #send all input down to shell's handle_input function
+                # send all input down to shell's handle_input function
                 try:
                     self.active_shell.handle_input(text)
                 except ShellExitError as e:
@@ -465,12 +471,16 @@ class OffPromptSession(PromptSession):
                 ######################
                 self.msf_console.execute(text)
 
+                # this is a terrible way to account for the prompt printing before it's changed
+                # on the msfrpcd side, but sleeping for 1 second seems to reduce this error
+                sleep(1)
         except UserOverride as e:
             # user approved warning override
             # future consider sending this to alternate/remote logs
             logging.warning(f"USER WARNING OVERRIDE: {e}")
             # execute command
             self.msf_console.execute(text)
+            sleep(1)
 
         except UserOverrideDenied as e:
             # user chose not to override warning message
@@ -531,7 +541,6 @@ class OffPromptSession(PromptSession):
             for allowed_module in user_allowed_modules:
                 # loop through modules that have a wildcard and see if the requested module starts with that
                 # shortcut the loop and return True if found; otherwise the loop will end and raise an error
-                # future: there's probably a more elegant/performant way to do this
                 if "*" in allowed_module:
                     if module.startswith(allowed_module.strip("*")):
                         return True
