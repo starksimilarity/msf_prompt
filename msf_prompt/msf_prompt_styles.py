@@ -34,7 +34,7 @@ def get_formatted_prompt(raw_text):
         msf = re.findall("msf[0-9]?", raw_text)[0]
     except:
         # probably in an interactive shell
-        return [('', raw_text)]
+        return [("", raw_text)]
     try:
         premodule = re.findall("( [\w]+)\(", raw_text)[0]
     except:
