@@ -48,7 +48,6 @@ class UserOverrideDenied(Exception):
 class ShellExitError(Exception):
     """Raised when a user is in a shell and then exits back to the main console
     """
-
     pass
 
 
@@ -337,8 +336,8 @@ class OffPromptSession(PromptSession):
 
                 if (
                     lower_text == "exit"
-                ):  # BUG: probably some bad side effects here (i.e. exitting session instead of shell)
-                    exit(0)
+                ):  
+                    raise EOFError("user typed exit") 
 
                 # handle when user wants to interact with a session
                 elif lower_text.startswith("sessions -i"):
@@ -486,6 +485,9 @@ class OffPromptSession(PromptSession):
             # user chose not to override warning message
             logging.warning(f"WARNING OVERRIDE DENIED: {e}")
             # do not execute command
+
+        except EOFError as e:
+            raise e
 
         except Exception as e:
             print(str(e))
