@@ -56,8 +56,10 @@ def main():
             continue
         except EOFError:
             break
-        else:
-            pass
+        except Exception as e:
+            print(f"something when very wrong, {e}")
+            logging.warning(f"something went very wrong {e}")
+            break
 
 
 if __name__ == "__main__":
