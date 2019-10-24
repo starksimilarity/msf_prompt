@@ -94,22 +94,23 @@ class MsfCompleter(Completer):
         already_suggested = (
             []
         )  # keeps track of things already suggested to the user between yields
-        for a in full_completions:
-            partial_completion = a[len(document.text) :].split("/")[
-                0
-            ]  # from the cursor to the next '/'
-            first_half = re.split("[ /]", a[: len(document.text)])[
-                -1
-            ]  # from the beginning of word to cursor
-            comp = first_half + partial_completion
-            if comp in already_suggested:
-                # prevents duplicates from being suggested to the user
-                # "already_suggested gets cleared on each time a CompleteEvent is called
-                continue
-            else:
-                already_suggested.append(comp)
-                # yield the entire text and input the text at the beginning of where the word begins
-                yield Completion(comp, -len(first_half))
+        if full_completions:
+            for a in full_completions:
+                partial_completion = a[len(document.text) :].split("/")[
+                    0
+                ]  # from the cursor to the next '/'
+                first_half = re.split("[ /]", a[: len(document.text)])[
+                    -1
+                ]  # from the beginning of word to cursor
+                comp = first_half + partial_completion
+                if comp in already_suggested:
+                    # prevents duplicates from being suggested to the user
+                    # "already_suggested gets cleared on each time a CompleteEvent is called
+                    continue
+                else:
+                    already_suggested.append(comp)
+                    # yield the entire text and input the text at the beginning of where the word begins
+                    yield Completion(comp, -len(first_half))
 
 
 class MsfAutoSuggest(AutoSuggestFromHistory):
