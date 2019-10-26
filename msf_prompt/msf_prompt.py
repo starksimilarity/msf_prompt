@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import logging
 
 from prompt_toolkit.history import FileHistory
-
+from prompt_toolkit.patch_stdout import patch_stdout
 
 import pymetasploit3.msfrpc as msfrpc
 import pymetasploit3.msfconsole as msfconsole
@@ -47,11 +47,11 @@ def main():
     # main user input loop
     while True:
         try:
-            # check to see if the user is in an interactive shell from a victim
-            user_input = sess.prompt(
-                get_formatted_prompt(sess.prompt_text), style=msf_style
-            )
-            sess.handle_input(user_input)
+            with patch_stdout(): # keeps new info (e.g scan results, new session) above the user input line
+                user_input = sess.prompt(
+                    get_formatted_prompt(sess.prompt_text), style=msf_style
+                )
+                sess.handle_input(user_input)
         except KeyboardInterrupt:
             continue
         except EOFError:
