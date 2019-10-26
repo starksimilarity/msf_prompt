@@ -323,7 +323,8 @@ class OffPromptSession(PromptSession):
         """
 
         try:
-            logging.info(text)  # this is different than the history file
+            # Log the command
+            logging.info(f"[COMMAND][USER: {self.current_user}]\n+ {text}")  
             lower_text = (
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
