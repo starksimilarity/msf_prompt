@@ -374,10 +374,6 @@ class OffPromptSession(PromptSession):
                     print(e)
                     logging.warning(f"<<< {str(e)}")
 
-                # for now, raise an execption so execution doesn't occur
-                raise Exception(
-                    "Interacting with sessions is not currently supported"
-                )
 
             else:
                 #3) check for keywords that will trigger permission checks ('exploit', 'use', 'set rhost')
@@ -698,7 +694,8 @@ class OffPromptShellSession(OffPromptSession):
                 raise ShellExitError(lower_text)
 
             elif lower_text:
-                print(self.shell.run_with_output(text, "DummyString", timeout=10))
+                # future: ID when the command is finished more gracefully
+                print(self.shell.run_with_output(text, "\n", timeout=5))
         except ShellExitError as e:
             # pass up to the next level to set the active_shell to None
             raise e
