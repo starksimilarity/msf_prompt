@@ -49,6 +49,7 @@ class UserOverrideDenied(Exception):
 class ShellExitError(Exception):
     """Raised when a user is in a shell and then exits back to the main console
     """
+
     pass
 
 
@@ -322,7 +323,7 @@ class OffPromptSession(PromptSession):
         """
 
         try:
-            logging.info(text) #this is different than the history file
+            logging.info(text)  # this is different than the history file
             lower_text = (
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
@@ -340,7 +341,6 @@ class OffPromptSession(PromptSession):
             # 2) check for keywords that will divert execution ('exit', 'sessions -i')
             elif lower_text == "exit":
                 raise EOFError("user typed exit")
-
 
             # handle when user wants to interact with a session
             elif lower_text.startswith("sessions -i"):
@@ -368,16 +368,13 @@ class OffPromptSession(PromptSession):
                         self.active_shell = shellSession
                         # somehow gracefully get back to msfconsole when they exit?
                     else:
-                        print(
-                            f"[-] Invalid session identifier: {requested_session}"
-                        )
+                        print(f"[-] Invalid session identifier: {requested_session}")
                 except Exception as e:
                     print(e)
                     logging.warning(f"<<< {str(e)}")
 
-
             else:
-                #3) check for keywords that will trigger permission checks ('exploit', 'use', 'set rhost')
+                # 3) check for keywords that will trigger permission checks ('exploit', 'use', 'set rhost')
                 if lower_text.startswith("exploit"):
                     """getting the attributes of the module is going to be difficult;
                     instead the program will check against valid list when user enters; investigate more

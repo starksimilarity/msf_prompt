@@ -11,6 +11,7 @@ DEFAULT_ALLOWED_TARGETS_FILE = "configs/allowed_targets.pickle"
 
 # future: add a bunch of comments
 
+
 def print_targets(tgts):
     for t in tgts:
         print(f"[*] {str(t)}")
@@ -21,6 +22,7 @@ def get_targets(prompt):
     targets = pickle.load(open(DEFAULT_ALLOWED_TARGETS_FILE, "rb"))
     print(f"The current target white-list is:")
     print_targets(targets)
+
 
 def add_target(prompt):
     targets = pickle.load(open(DEFAULT_ALLOWED_TARGETS_FILE, "rb"))
