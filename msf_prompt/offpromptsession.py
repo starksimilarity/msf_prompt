@@ -322,11 +322,12 @@ class OffPromptSession(PromptSession):
         """
 
         try:
+            logging.info(text) #this is different than the history file
             lower_text = (
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
 
-            # 1) check if user is in an active shell (divert execution to shell if true) 
+            # 1) check if user is in an active shell (divert execution to shell if true
             if self.active_shell:
                 # send all input down to shell's handle_input function
                 try:

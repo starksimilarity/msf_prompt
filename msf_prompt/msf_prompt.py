@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 import logging
 
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.patch_stdout import patch_stdout
+# from prompt_toolkit.patch_stdout import patch_stdout, StdoutProxy
+from patch_stdout import patch_stdout, StdoutProxy
 
 import pymetasploit3.msfrpc as msfrpc
 import pymetasploit3.msfconsole as msfconsole
