@@ -4,7 +4,8 @@ msf_prompt
 
 Author: starksimilarity <starksimilarity@gmail.com>
 
-Description: msf_prompt is a Python library that emulates the msfconsole by wrapping a pymetasploit3 MsfRpcConsole in a prompt_toolkit PromptSession. 
+Description: msf_prompt is a Python library that emulates the msfconsole by 
+wrapping a pymetasploit3 MsfRpcConsole in a prompt_toolkit PromptSession.
 
 """
 from .utils import *
@@ -19,9 +20,12 @@ __all__ = [
     "parseconfig",
     # Offpromptsession.
     "MsfAutoSuggest",
+    "MsfCompleter",
     "OffPromptSession",
+    "OffPromptShellSession",
     "InvalidTargetError",
     "InvalidPermissionError",
     "UserOverride",
     "UserOverrideDenied",
+    "ShellExitError",
 ]

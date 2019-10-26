@@ -2,14 +2,14 @@ from __future__ import unicode_literals
 import logging
 
 from prompt_toolkit.history import FileHistory
-
+from utils.patch_stdout_shim import patch_stdout
 
 import pymetasploit3.msfrpc as msfrpc
 import pymetasploit3.msfconsole as msfconsole
 
 from offpromptsession import OffPromptSession
 from msf_prompt_styles import msf_style, get_formatted_prompt
-from utils import parseargs, parseconfig
+from utils.utils import parseargs, parseconfig
 
 
 CONFIG_FILENAME = "configs/prompt_config"
@@ -29,17 +29,17 @@ def main():
             format="===================\n%(asctime)s\n%(message)s",
             level=logging.INFO,
         )
+        with patch_stdout():
+            hist = opts.get("history_file", HISTORY_FILENAME)
+            allow_overrides = opts.get("allow_overrides", True)
 
-        hist = opts.get("history_file", HISTORY_FILENAME)
-        allow_overrides = opts.get("allow_overrides", True)
+            logging.info("Starting MsfRpcClient, MsfRpcConsole, OffPromptSession")
+            client = msfrpc.MsfRpcClient(**opts)
+            console = msfconsole.MsfRpcConsole(client)
 
-        logging.info("Starting MsfRpcClient, MsfRpcConsole, OffPromptSession")
-        client = msfrpc.MsfRpcClient(**opts)
-        console = msfconsole.MsfRpcConsole(client)
-
-        sess = OffPromptSession(
-            console, hist_name=hist, allow_overrides=allow_overrides
-        )
+            sess = OffPromptSession(
+                console, hist_name=hist, allow_overrides=allow_overrides
+            )
     except Exception as e:
         print(f"something when very wrong, {e}")
         logging.warning(f"something went very wrong {e}")
@@ -47,11 +47,13 @@ def main():
     # main user input loop
     while True:
         try:
-            # check to see if the user is in an interactive shell from a victim
-            user_input = sess.prompt(
-                get_formatted_prompt(sess.prompt_text), style=msf_style
-            )
-            sess.handle_input(user_input)
+            # Keeps new info (e.g scan results, new session) above the user input line
+            # Redirects all output through the default logger
+            with patch_stdout():
+                user_input = sess.prompt(
+                    get_formatted_prompt(sess.prompt_text), style=msf_style
+                )
+                sess.handle_input(user_input)
         except KeyboardInterrupt:
             continue
         except EOFError:
