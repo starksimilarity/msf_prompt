@@ -9,15 +9,39 @@ from prompt_toolkit import PromptSession
 DEFAULT_USER_MODULE_FILE = "configs/user_module_list.pickle"
 DEFAULT_ALLOWED_TARGETS_FILE = "configs/allowed_targets.pickle"
 
-# future: add a bunch of comments
-
 
 def print_targets(tgts):
+    """Method to print targets and subnets each on a new line each beginning with [*]
+
+    Parameters
+    ==========
+    tgts : list[ipaddress.ip_address]
+        List of IPv4 or IPv6 addresses or subnets
+
+    Returns
+    =======
+    None
+
+    Raises
+    ======
+    Exception
+    """
     for t in tgts:
         print(f"[*] {str(t)}")
 
 
 def get_targets(prompt):
+    """Return current list of approved targets and subnets
+
+    Parameters
+    ==========
+    prompt : prompt_toolkit PromptSession
+        prompt to allow the function to initiate follow-on user-input
+
+    Returns
+    =======
+    None
+    """
     # future: make this not a pickle...
     targets = pickle.load(open(DEFAULT_ALLOWED_TARGETS_FILE, "rb"))
     print(f"The current target white-list is:")
@@ -25,24 +49,54 @@ def get_targets(prompt):
 
 
 def add_target(prompt):
+    """Allow the user to add another IP address or subnet to approved list
+
+    Parameters
+    ==========
+    prompt : prompt_toolkit PromptSession
+        prompt to allow the function to initiate follow-on user-input
+
+    Returns
+    =======
+    None
+    """
     targets = pickle.load(open(DEFAULT_ALLOWED_TARGETS_FILE, "rb"))
     target = prompt.prompt("Enter a target or CIDR to add to white-list: ")
     try:
         targets.append(ipaddress.ip_address(target))
     except Exception as e:
-        targets.append(ipaddress.ip_network(target))
+        try:
+            targets.append(ipaddress.ip_network(target))
+        except Exception as e:
+            print(f"Invalid IP address or CIDR")
+
     print(f"The new target white-list is:")
     print_targets(targets)
     pickle.dump(targets, open(DEFAULT_ALLOWED_TARGETS_FILE, "wb"))
 
 
 def delete_target(prompt):
+    """Allow the user to delete an IP address of subnet from the approved list
+
+    Parameters
+    ==========
+    prompt : prompt_toolkit PromptSession
+        prompt to allow the function to initiate follow-on user-input
+
+    Returns
+    =======
+    None
+    """
     targets = pickle.load(open(DEFAULT_ALLOWED_TARGETS_FILE, "rb"))
     target = prompt.prompt("Enter a target to delete from white-list: ")
     try:
         tgt = ipaddress.ip_address(target)
     except Exception as e:
-        tgt = ipaddress.ip_network(target)
+        try:
+            tgt = ipaddress.ip_network(target)
+        except Exception as e:
+            print(f"Invalid IP address or CIDR")
+
     if tgt in targets:
         targets[:] = [x for x in targets if x != tgt]
     elif target == "*":
@@ -56,17 +110,40 @@ def delete_target(prompt):
 
 
 def get_permissions(prompt):
+    """Display the current list of user/module permissions
+
+    Parameters
+    ==========
+    prompt : prompt_toolkit PromptSession
+        prompt to allow the function to initiate follow-on user-input
+
+    Returns
+    =======
+    None
+    """
     # future: make this not a pickle...
     permissions = pickle.load(open(DEFAULT_USER_MODULE_FILE, "rb"))
     print(f"The current permission list is {permissions}")
 
 
 def add_permission(prompt):
+    """Allow user to add a user/module permission
+
+    Parameters
+    ==========
+    prompt : prompt_toolkit PromptSession
+        prompt to allow the function to initiate follow-on user-input
+
+    Returns
+    =======
+    None
+    """
     permissions = pickle.load(open(DEFAULT_USER_MODULE_FILE, "rb"))
     perm = prompt.prompt("Enter a user:module permission to add: ")
     try:
         user, module = perm.split(":")
-        permissions.get(user, []).append(module)
+        new_perms = permissions.get(user, []).append(module)
+        permissions[user] = new_perms
     except Exception as e:
         print(e)
     print(f"The new permission list is {permissions}")
@@ -74,6 +151,17 @@ def add_permission(prompt):
 
 
 def delete_permission(prompt):
+    """Allow user to delete user/module permission
+
+    Parameters
+    ==========
+    prompt : prompt_toolkit PromptSession
+        prompt to allow the function to initiate follow-on user-input
+
+    Returns
+    =======
+    None
+    """
     permissions = pickle.load(open(DEFAULT_USER_MODULE_FILE, "rb"))
     perm = prompt.prompt("Enter a user:module permission to delete: ")
     try:
@@ -85,6 +173,7 @@ def delete_permission(prompt):
             print(f"{module} not in {perms}")
         else:
             perms[:] = [x for x in perms if x != module]
+            permissions[user] = perms
 
     except Exception as e:
         print(e)

@@ -324,7 +324,7 @@ class OffPromptSession(PromptSession):
 
         try:
             # Log the command
-            logging.info(f"[COMMAND][USER: {self.current_user}]\n+ {text}")  
+            logging.info(f"[COMMAND][USER: {self.current_user}]\n+ {text}")
             lower_text = (
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
