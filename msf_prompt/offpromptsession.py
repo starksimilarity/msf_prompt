@@ -49,7 +49,6 @@ class UserOverrideDenied(Exception):
 class ShellExitError(Exception):
     """Raised when a user is in a shell and then exits back to the main console
     """
-
     pass
 
 
@@ -160,6 +159,10 @@ class MsfAutoSuggest(AutoSuggestFromHistory):
         buffer : prompt_toolkit.buffer.Buffer
         document : prompt_toolkit.document.Document
 
+        Returns
+        =======
+        suggestion : prompt_toolkit.auto_suggest.Suggestion
+            The suggestion to load on the line
         """
 
         # check user history first
@@ -187,9 +190,12 @@ class MsfAutoSuggest(AutoSuggestFromHistory):
 
 
 class MsfValidator(Validator):
-    """
-    Implements Validator ABC.  Ensures input into the msf_prompt passes certain checks
-    (e.g. valid target, user has permission for tool, etc)
+    """Implements Validator ABC.  
+    
+    Ensures input into the msf_prompt passes certain checks (e.g. valid target, 
+    user has permission for tool, etc)
+    
+    Not currently used.
     """
 
     def __init__(self, **kwargs):
@@ -324,7 +330,7 @@ class OffPromptSession(PromptSession):
 
         try:
             # Log the command
-            logging.info(f"[COMMAND][USER: {self.current_user}]\n+ {text}")  
+            logging.info(f"[COMMAND][USER: {self.current_user}]\n+ {text}")
             lower_text = (
                 text.lower().strip()
             )  # temp variable to prevent re-writing text.lower().strip() all the time
@@ -375,10 +381,12 @@ class OffPromptSession(PromptSession):
                     logging.warning(f"<<< {str(e)}")
 
             else:
-                # 3) check for keywords that will trigger permission checks ('exploit', 'use', 'set rhost')
+                # 3) check for keywords that will trigger permission checks 
+                # ('exploit', 'use', 'set rhost')
                 if lower_text.startswith("exploit"):
                     """getting the attributes of the module is going to be difficult;
-                    instead the program will check against valid list when user enters; investigate more
+                    instead the program will check against valid list when user enters; 
+                    investigate more
 
                     turns out you can run console.execute("get [parameter (e.g. rhost)]") and you'll get
                     the answer back in as: "[parameter] => [value]"; need to look into this more
@@ -619,6 +627,11 @@ class OffPromptSession(PromptSession):
     @property
     def prompt_text(self):
         """rpc call through the MsfRpcConsole to get the current prompt
+
+        Returns
+        =======
+        prompt : str
+            String represtation of what msfrpcd would display to user given the context
         """
         if self.active_shell:
             return self.active_shell.prompt_text

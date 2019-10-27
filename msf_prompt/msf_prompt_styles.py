@@ -2,6 +2,7 @@ from prompt_toolkit.styles import Style
 import re
 import string
 
+# style used when displaying console prompt
 msf_style = Style.from_dict(
     {
         # user input

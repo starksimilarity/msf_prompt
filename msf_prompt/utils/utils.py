@@ -2,6 +2,8 @@ from optparse import OptionParser
 
 
 def parseargs():
+    """Parses arguments from the command line.
+    """
     p = OptionParser()
     p.add_option("-P", dest="password", help="Password for msfrpcd", default="password")
     p.add_option(
@@ -42,7 +44,7 @@ def parseconfig(filename):
         for line in infi:
             if "#" in line:
                 opt, comment, *_ = line.split("#")
-                if len(opt) > 0:
+                if opt:
                     param, val = opt.split(":")
                     param = param.strip()
                     val = val.strip().strip(
@@ -51,10 +53,11 @@ def parseconfig(filename):
                     # unsure if removing the quotes is going to cause a BUG...
 
                     try:
-                        val = int(val)
+                        val = int(val)  # try to convert to int
                     except Exception as e:
                         pass
 
+                    # try to set True/False
                     if val == "True":
                         val = True
                     elif val == "False":
