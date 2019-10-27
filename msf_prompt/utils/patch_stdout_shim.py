@@ -22,6 +22,11 @@ import logging
 
 
 class LoggingStdoutProxy(pso.StdoutProxy):
+    """Extends prompt_toolkit StdoutProxy by adding logging to the write method
+
+    All other attributes and methods are inherited from StdoutProxy 
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

@@ -1,15 +1,22 @@
+"""An example controlling script for an OffPromptSession.
+
+Creates an MsfRpcClient and MsfRpcConsole based on config files
+and user input and then creates the OffPromptSession.  Establishes
+the primary loop for prompting the user.
+"""
+
 from __future__ import unicode_literals
 import logging
 
 from prompt_toolkit.history import FileHistory
-from utils.patch_stdout_shim import patch_stdout
 
 import pymetasploit3.msfrpc as msfrpc
 import pymetasploit3.msfconsole as msfconsole
 
 from offpromptsession import OffPromptSession
 from msf_prompt_styles import msf_style, get_formatted_prompt
-from utils.utils import parseargs, parseconfig
+from .utils.utils import parseargs, parseconfig
+from .utils.patch_stdout_shim import patch_stdout
 
 
 CONFIG_FILENAME = "configs/prompt_config"
@@ -18,7 +25,13 @@ LOGGING_FILENAME = ".off_prompt_log"
 
 
 def main():
+    """Main loop for msf_prompt an example controlling script for an OffPromptSession
 
+    Basic Flow:
+        - Get configs (passed on command line and in config file)
+        - Setup connections to msfrpcd and ancillary tasks (e.g. logging)
+        - Begin user input loop
+    """
     try:
         o = parseargs()  # returns a Values object
         opts = parseconfig(CONFIG_FILENAME)
@@ -47,7 +60,8 @@ def main():
     # main user input loop
     while True:
         try:
-            # Keeps new info (e.g scan results, new session) above the user input line
+            # Keeps new info (e.g scan results, new session notification) 
+            #                                   above the user input line
             # Redirects all output through the default logger
             with patch_stdout():
                 user_input = sess.prompt(
