@@ -15,8 +15,8 @@ import pymetasploit3.msfconsole as msfconsole
 
 from offpromptsession import OffPromptSession
 from msf_prompt_styles import msf_style, get_formatted_prompt
-from .utils.utils import parseargs, parseconfig
-from .utils.patch_stdout_shim import patch_stdout
+from utils.utils import parseargs, parseconfig
+from utils.patch_stdout_shim import patch_stdout
 
 
 CONFIG_FILENAME = "configs/prompt_config"
