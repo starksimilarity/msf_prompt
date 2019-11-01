@@ -49,6 +49,7 @@ class UserOverrideDenied(Exception):
 class ShellExitError(Exception):
     """Raised when a user is in a shell and then exits back to the main console
     """
+
     pass
 
 
@@ -381,7 +382,7 @@ class OffPromptSession(PromptSession):
                     logging.warning(f"<<< {str(e)}")
 
             else:
-                # 3) check for keywords that will trigger permission checks 
+                # 3) check for keywords that will trigger permission checks
                 # ('exploit', 'use', 'set rhost')
                 if lower_text.startswith("exploit"):
                     """getting the attributes of the module is going to be difficult;

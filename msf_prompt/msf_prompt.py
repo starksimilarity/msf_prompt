@@ -33,9 +33,12 @@ def main():
         - Begin user input loop
     """
     try:
-        o = parseargs()  # returns a Values object
         opts = parseconfig(CONFIG_FILENAME)
-        opts.update(o.__dict__)  # override config values with commandline
+        o = parseargs()  # returns a Values object
+        for k, v in o.__dict__.items():
+            if k and v:
+                # only override config file value if command line param is not None
+                opts[k] = v
 
         logging.basicConfig(
             filename=opts.get("log_file", LOGGING_FILENAME),
@@ -60,7 +63,7 @@ def main():
     # main user input loop
     while True:
         try:
-            # Keeps new info (e.g scan results, new session notification) 
+            # Keeps new info (e.g scan results, new session notification)
             #                                   above the user input line
             # Redirects all output through the default logger
             with patch_stdout():
