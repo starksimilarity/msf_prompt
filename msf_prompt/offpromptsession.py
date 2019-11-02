@@ -600,7 +600,7 @@ class OffPromptSession(PromptSession):
             with open(self.module_filename, "rb") as infi:
                 module_list = pickle.load(infi)
         except FileNotFoundError as e:
-            module_list['ALL'] = "*" # fails open if no module list is found
+            module_list["ALL"] = "*"  # fails open if no module list is found
             logging.warning(e)
             print(e)
 

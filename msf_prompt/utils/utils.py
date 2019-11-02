@@ -51,7 +51,7 @@ def parseconfig(filename):
                     try:
                         val = int(val)  # try to convert to int
                     except Exception as e:
-                            pass
+                        pass
 
                     # try to set True/False
                     if val == "True":
