@@ -33,10 +33,13 @@ def parseconfig(filename):
         Dictionary of options set by the config file
     """
     options = {}
-    with open(filename, "r+") as infi:
-        for line in infi:
-            if "#" in line:
-                opt, comment, *_ = line.split("#")
+    try:
+        with open(filename, "r+") as infi:
+            for line in infi:
+                if "#" in line:
+                    opt, comment, *_ = line.split("#")
+                elif line:
+                    opt = line
                 if opt:
                     param, val = opt.split(":")
                     param = param.strip()
@@ -48,7 +51,7 @@ def parseconfig(filename):
                     try:
                         val = int(val)  # try to convert to int
                     except Exception as e:
-                        pass
+                            pass
 
                     # try to set True/False
                     if val == "True":
@@ -57,5 +60,6 @@ def parseconfig(filename):
                         val = False
 
                     options[param] = val
-
+    except FileNotFoundError as e:
+        print(e)
     return options

@@ -245,8 +245,11 @@ class OffPromptSession(PromptSession):
     """
 
     wordlist = []
-    with open(DEFAULT_COMPLETER_WORDLIST, "r+") as infi:
-        wordlist = infi.read().strip().split(",")
+    try:
+        with open(DEFAULT_COMPLETER_WORDLIST, "r+") as infi:
+            wordlist = infi.read().strip().split(",")
+    except FileNotFoundError as e:
+        logging.warning(e)
 
     def __init__(
         self,
@@ -592,9 +595,14 @@ class OffPromptSession(PromptSession):
         """
 
         # future: make this a DB not a pickle
-        module_list = []
-        with open(self.module_filename, "rb") as infi:
-            module_list = pickle.load(infi)
+        module_list = {}
+        try:
+            with open(self.module_filename, "rb") as infi:
+                module_list = pickle.load(infi)
+        except FileNotFoundError as e:
+            module_list['ALL'] = "*" # fails open if no module list is found
+            logging.warning(e)
+            print(e)
 
         return module_list.get(user, []) + module_list.get("ALL", [])
 
