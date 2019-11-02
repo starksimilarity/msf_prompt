@@ -47,6 +47,7 @@ def main():
         )
         with patch_stdout():
             hist = opts.get("history_file", HISTORY_FILENAME)
+
             allow_overrides = opts.get("allow_overrides", True)
 
             logging.info("Starting MsfRpcClient, MsfRpcConsole, OffPromptSession")
