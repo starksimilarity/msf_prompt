@@ -40,7 +40,7 @@ def parseconfig(filename):
                     opt, comment, *_ = line.split("#")
                 elif line:
                     opt = line
-                if opt:
+                if ":" in opt:
                     param, val = opt.split(":")
                     param = param.strip()
                     val = val.strip().strip(
