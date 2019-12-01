@@ -28,6 +28,7 @@ DEFAULT_ALLOWED_TARGETS_FILE = "configs/allowed_targets.pickle"
 DEFAULT_COMPLETER_WORDLIST = "configs/word_suggestions.txt"
 # The file that contains the list of user command history
 DEFAULT_COMPLETER_WORDLIST = ".off_prompt_hist"
+DEFAULT_HISTORY_FILENAME = ".off_prompt_hist"
 
 
 class InvalidTargetError(Exception):
@@ -296,6 +297,13 @@ class OffPromptSession(PromptSession):
         else:
             self.hist_name = DEFAULT_HISTORY_FILENAME
 
+        # If file doesn't exist, create it
+        try:
+            with open(self.hist_name, "r+") as infi:
+                pass
+        except FileNotFoundError as e:
+            with open(self.hist_name, "w+") as outfi:
+                pass
         _history = FileHistory(self.hist_name)
 
         super().__init__(history=_history, *args, **kwargs)
