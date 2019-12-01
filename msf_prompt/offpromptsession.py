@@ -390,7 +390,7 @@ class OffPromptSession(PromptSession):
                         print(f"[-] Invalid session identifier: {requested_session}")
                 except Exception as e:
                     print(e)
-                    logging.warning(f"<<< {str(e)}")
+                    logging.warning(f"from sessions -i\n <<< {str(e)}")
 
             else:
                 # 3) check for keywords that will trigger permission checks
@@ -427,8 +427,9 @@ class OffPromptSession(PromptSession):
                         self.validate_targets(targets)
 
                     except InvalidTargetError as e:
+                        print("in set rhost")
                         print(e)
-                        logging.warning(f"<<< {str(e)}")
+                        logging.warning(f"from invalid target error\n<<< {str(e)}")
 
                         if self.allow_overrides:
                             # ask user if they want to override the warning
@@ -458,7 +459,7 @@ class OffPromptSession(PromptSession):
                         self.validate_user_perms(module)
                     except InvalidPermissionError as e:
                         print(e)
-                        logging.warning(f"<<< {str(e)}")
+                        logging.warning(f"from invalid permission error<<< {str(e)}")
 
                         if self.allow_overrides:
                             # ask user if they want to override the warning
@@ -482,7 +483,7 @@ class OffPromptSession(PromptSession):
 
                     except Exception as e:
                         print(e)
-                        logging.warning(f"<<< {str(e)}")
+                        logging.warning(f"from use\n<<< {str(e)}")
 
                 ######################
                 # finally do something
@@ -511,7 +512,7 @@ class OffPromptSession(PromptSession):
 
         except Exception as e:
             print(str(e))
-            logging.warning(f"<<< {str(e)}")
+            logging.warning(f"from handle input\n<<< {str(e)}")
 
     def validate_targets(self, targets):
         """
@@ -637,7 +638,7 @@ class OffPromptSession(PromptSession):
                     tgts.append(tgt)
         except Exception as e:
             print(e)
-            logging.warning(f"<<< {str(e)}")
+            logging.warning(f"from allowed_targets\n<<< {str(e)}")
 
         return tgts
 
@@ -730,4 +731,4 @@ class OffPromptShellSession(OffPromptSession):
             raise e
         except Exception as e:
             print(e)
-            logging.warning(f"<<< {str(e)}")
+            logging.warning(f"from handle_input\n<<< {str(e)}")
