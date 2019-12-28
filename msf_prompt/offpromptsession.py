@@ -3,6 +3,7 @@ import ipaddress
 import logging
 import os
 import pickle
+import pwd
 import re
 import string
 from time import sleep
@@ -339,7 +340,6 @@ class OffPromptSession(PromptSession):
         UserOverrideDenied
             If user declines to override warning
         """
-
         try:
             # Log the command
             logging.info(f"[COMMAND][USER: {self.current_user}]\n+ {text}")
@@ -458,6 +458,7 @@ class OffPromptSession(PromptSession):
                         self.validate_user_perms(module)
                     except InvalidPermissionError as e:
                         print(e)
+
                         logging.warning(f"<<< {str(e)}")
 
                         if self.allow_overrides:
@@ -502,6 +503,7 @@ class OffPromptSession(PromptSession):
             sleep(1)
 
         except UserOverrideDenied as e:
+            print(e)
             # user chose not to override warning message
             logging.warning(f"WARNING OVERRIDE DENIED: {e}")
             # do not execute command
@@ -510,7 +512,7 @@ class OffPromptSession(PromptSession):
             raise e
 
         except Exception as e:
-            print(str(e))
+            print(e)
             logging.warning(f"<<< {str(e)}")
 
     def validate_targets(self, targets):
@@ -558,7 +560,6 @@ class OffPromptSession(PromptSession):
 
         # future: get user allowed modules from db
         user_allowed_modules = self.allowed_modules(self.current_user)
-
         if module not in user_allowed_modules:  # simple exact check
             for allowed_module in user_allowed_modules:
                 # loop through modules that have a wildcard and see if the requested module starts with that
@@ -573,7 +574,7 @@ class OffPromptSession(PromptSession):
 
     @property
     def current_user(self):
-        return os.getlogin()
+        return pwd.getpwuid(os.geteuid())[0]
 
     @property
     def allow_overrides(self):
