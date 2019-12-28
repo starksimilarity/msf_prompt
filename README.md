@@ -38,12 +38,12 @@ sudo python3 setup.py install
 
 ## Usage
 
-Stand-alone
+Stand-Alone
 ```bash
 > python3 msf_prompt.py
 ```
 
-As a module
+As a Module
 ```python
 import offpromptsession 
 import pymetasploit3
@@ -54,6 +54,12 @@ console = pymetasploit3.msfconsole.MsfRpcConsole(client)
 sess = offpromptsession.OffPromptSession(console)
 
 sess.prompt() #interact
+```
+
+With Docker
+```bash
+sudo docker build -t msf_prompt .
+sudo docker run -it msf_prompt msf_prompt.py [options]
 ```
 
 To modify users/targets
